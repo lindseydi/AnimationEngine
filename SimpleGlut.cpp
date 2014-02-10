@@ -208,7 +208,6 @@ void printInteraction(){
 		if(tempchar == 'y'){
 			createKeyFrames();
 		}else{
-
 			for(int i=0; i<10; i++){
 				cout << "Would you like to create a Quaternion for your" << i << "th Key Frame? y/n"<< endl;
 				cin >> tempchar;
@@ -249,9 +248,9 @@ void drawHierarchy(Node* head, MatrixX3f transform){
 	transform.print();
 		//T builds on itself with each iteration
 		MatrixX3f V(4,1);
-		V(0, 0) = ptr->V.getx();
-		V(1, 0) = ptr->V.gety();
-		V(2, 0) = ptr->V.getz();			//V(2,0) = -10.0;
+		V(0, 0) = ptr->V.x;
+		V(1, 0) = ptr->V.y;
+		V(2, 0) = ptr->V.z;			//V(2,0) = -10.0;
 		V(3, 0) = 1.0;
 
 		MatrixX3f temp = T * V;

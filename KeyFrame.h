@@ -7,6 +7,69 @@ using namespace Eigen;
 
 class KeyFrame
 {
+	//Global functions
+	static Quaternionf& vector3fToQuaternion(Vector3f euler)
+	{
+		float angle;
+
+		Quaternionf retValue;
+		angle = euler.x * 0.5;
+		const float sr = sin(angle);
+		const float cr = cos(angle);
+
+		angle = euler.y * 0.5;
+		const float sp = sin(angle);
+		const float cp = cos(angle);
+
+		angle = euler.z * 0.5;
+		const float sy = sin(angle);
+		const float cy = cos(angle);
+
+		const float cpcy = cp * cy;
+		const float spcy = sp * cy;
+		const float cpsy = cp * sy;
+		const float spsy = sp * sy;
+
+		retValue.x = (float)(sr * cpcy - cr * spsy);
+		retValue.y = (float)(cr * spcy + sr * cpsy);
+		retValue.z = (float)(cr * cpsy - sr * spcy);
+		retValue.w = (float)(cr * cpcy + sr * spsy);
+
+		retValue.normalize();
+		return retValue;
+	}
+
+	static Quaternionf& vector3fToQuaternion(float xin, float yin, float zin)
+	{
+		float angle;
+
+		Quaternionf retValue;
+		angle = xin * 0.5;
+		const float sr = sin(angle);
+		const float cr = cos(angle);
+
+		angle = yin * 0.5;
+		const float sp = sin(angle);
+		const float cp = cos(angle);
+
+		angle = zin * 0.5;
+		const float sy = sin(angle);
+		const float cy = cos(angle);
+
+		const float cpcy = cp * cy;
+		const float spcy = sp * cy;
+		const float cpsy = cp * sy;
+		const float spsy = sp * sy;
+
+		retValue.x = (float)(sr * cpcy - cr * spsy);
+		retValue.y = (float)(cr * spcy + sr * cpsy);
+		retValue.z = (float)(cr * cpsy - sr * spcy);
+		retValue.w = (float)(cr * cpcy + sr * spsy);
+
+		 retValue.normalize();
+		 return retValue;
+	}
+
 public:
 	Vector3f position;
 	Quaternionf orient;
@@ -87,64 +150,6 @@ public:
 		this->position.x = xin;
 		this->position.y = yin;
 		this->position.z = zin;
-	}
-
-	Quaternionf& vector3fToQuaternion(Vector3f euler){
-		float angle;
-
-		Quaternionf retValue;
-		angle = euler.x * 0.5;
-		const float sr = sin(angle);
-		const float cr = cos(angle);
-
-		angle = euler.y * 0.5;
-		const float sp = sin(angle);
-		const float cp = cos(angle);
-
-		angle = euler.z * 0.5;
-		const float sy = sin(angle);
-		const float cy = cos(angle);
-
-		const float cpcy = cp * cy;
-		const float spcy = sp * cy;
-		const float cpsy = cp * sy;
-		const float spsy = sp * sy;
-
-		retValue.x = (float)(sr * cpcy - cr * spsy);
-		retValue.y = (float)(cr * spcy + sr * cpsy);
-		retValue.z = (float)(cr * cpsy - sr * spcy);
-		retValue.w = (float)(cr * cpcy + sr * spsy);
-
-		return retValue.normalize();
-	}
-
-		Quaternionf& vector3fToQuaternion(float xin, float yin, float zin){
-		float angle;
-
-		Quaternionf retValue;
-		angle = xin * 0.5;
-		const float sr = sin(angle);
-		const float cr = cos(angle);
-
-		angle = yin * 0.5;
-		const float sp = sin(angle);
-		const float cp = cos(angle);
-
-		angle = zin * 0.5;
-		const float sy = sin(angle);
-		const float cy = cos(angle);
-
-		const float cpcy = cp * cy;
-		const float spcy = sp * cy;
-		const float cpsy = cp * sy;
-		const float spsy = sp * sy;
-
-		retValue.x = (float)(sr * cpcy - cr * spsy);
-		retValue.y = (float)(cr * spcy + sr * cpsy);
-		retValue.z = (float)(cr * cpsy - sr * spcy);
-		retValue.w = (float)(cr * cpcy + sr * spsy);
-
-		return retValue.normalize();
 	}
 
 void print(){

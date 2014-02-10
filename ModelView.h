@@ -20,9 +20,9 @@ using namespace std;
 
 class ModelView
 {
-	vector <vertex3> vertices;
+	vector <Vector3f> vertices;
 	vector <polygon> edges;
-	vector <vertex3> normals;
+	vector <Vector3f> normals;
 
 public:
 	ModelView(void){
@@ -41,13 +41,13 @@ public:
 		edges.resize(edge_count);
 	}
 
-	vertex3 calcTriangleNorm(vertex3 vec0, vertex3 vec1, vertex3 vec2)
+	Vector3f calcTriangleNorm(Vector3f vec0, Vector3f vec1, Vector3f vec2)
 {
-	vertex3 edge1 = vec1 - vec0;
+	Vector3f edge1 = vec1 - vec0;
 	edge1.normalize();
-	vertex3 edge2 = vec2 - vec0;
+	Vector3f edge2 = vec2 - vec0;
 	edge2.normalize();
-	vertex3 normal = edge1.crossProduct(edge2);
+	Vector3f normal = edge1.cross(edge2);
 	normal.normalize();
 	return normal;
 }
@@ -55,7 +55,9 @@ public:
 void generatenormals(void){
 	int i;
 	for(i=0; i<vertices.size(); i++){
-		normals[i].zero();
+		normals[i].x =0.0f;
+		normals[i].y = 0.0f;
+		normals[i].z = 0.0f;
 	}
 	
 	for(i=0; i<edges.size(); i++){
@@ -64,7 +66,7 @@ void generatenormals(void){
 		int secondv = edges[i].getb();
 		int thirdv = edges[i].getc();
 		int fourthv = edges[i].getd();
-		vertex3 normal = calcTriangleNorm(vertices[firstv], vertices[secondv], vertices[thirdv]);
+		Vector3f normal = calcTriangleNorm(vertices[firstv], vertices[secondv], vertices[thirdv]);
 			normals[firstv] = normals[firstv] + normal;
 			normals[secondv] = normals[secondv] + normal;
 			normals[thirdv] = normals[thirdv] + normal;
@@ -89,7 +91,7 @@ void generatenormals(void){
 	inFile >> str;
 	inFile >> str;
 	vert_count = atoi(str.c_str());
-	//vertex3 *vertices = ((vertex3*)  malloc(vert_count*sizeof(vertex3)));
+	//Vector3f *vertices = ((Vector3f*)  malloc(vert_count*sizeof(Vector3f)));
 	inFile >> str;
 	edge_count = atoi(str.c_str());
 	float x, y, z;
@@ -104,7 +106,7 @@ void generatenormals(void){
 		y = (GLfloat) atof(str.c_str());
 		inFile >> str;
 		z = (GLfloat) atof(str.c_str());
-		vertex3 vertex(x, y, z);
+		Vector3f vertex(x, y, z);
 		vertices[ i ] = vertex;
 	}
 	edges.resize(edge_count);

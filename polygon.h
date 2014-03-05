@@ -1,51 +1,71 @@
+
+#ifndef _POLYGON_H_
+#define _POLYGON_H_
+
 #pragma once
-#include <GL/glut.h>
-#include <GL/glu.h>
+
+#include <boost/shared_ptr.hpp>
+
+#include <vector>
+
+enum PolygonType{point = 1, line, triangle, quad, pentagon };
 
 class polygon {
-	int type;
-	int a;
-	int b;
-	int c;
-	int d;
 public:
-	polygon(void){
-		a = 0;
-		b =0;
-		c= 0;
-		d = 1;
+	
+	PolygonType type;
+	vector<int> vertexIndices;	//how to save indices...TODO
+	vertex3 normal;
+
+	polygon(){
+		//default
 	}
 
-	polygon(int ain, int bin, int cin){
-		type = 3;
-		a = ain;
-		b = bin;
-		c = cin;
-		d = 1;
+	polygon(const polygon& poly){
+		//copy constructor
 	}
-	polygon(int ain, int bin, int cin, int din){
-		type = 4;
-		a = ain;
-		b= bin;
-		c = cin;
-		d = din;
+
+	polygon(vector<int> vertexIndices){
+		this->vertexIndices.clear();
+		for(unsigned int i=0; i < vertexIndices.size(); i++){
+			this->vertexIndices.push_back(vertexIndices.at(i));
+		}
+		type = (PolygonType)vertexIndices.size();
+		calcNorm();
 	}
-	int geta (void){
-		return a;
+
+	polygon(int a, int b, int c){
+		vertexIndices.push_back(a);
+		vertexIndices.push_back(b);
+		vertexIndices.push_back(c);
+		type = triangle;
 	}
-	int getb (void){
-		return b;
+
+	polygon(int a, int b, int c, int d){
+		vertexIndices.push_back(a);
+		vertexIndices.push_back(b);
+		vertexIndices.push_back(c);
+		vertexIndices.push_back(d);
+		type = quad;
 	}
-	int getc (void){
-		return c;
-	}
-	int getd (void){
-		return d;
-	}
+	
 	int getType (void){
+		type = (PolygonType)vertexIndices.size();	//for extra safety
 		return type;
 	}
-	int* getPointer(void) {
-		return &a;
+
+	void calcNorm()
+	{
+		//true for any plane
+		//how do I use the methods created before now?
+		vertex3 edge1 = vertexIndices.at(1) - vertexIndices.at(0);
+			edge1.normalize();
+			vertex3 edge2 = vertexIndices.at(2) - vertexIndices.at(0);
+			edge2.normalize();
+			vertex3 local_normal = edge1.cross(edge2);
+			local_normal.normalize();
+			this->normal = local_normal;
 	}
 };
+
+#endif  // _POLYGON_H_

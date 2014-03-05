@@ -4,11 +4,11 @@
 
 Camera::Camera(void)
 {
-	position = Vector3f( 0.0, 0.0, 1.0 );
+	position = vertex3( 0.0, 0.0, 1.0 );
 
-    viewpoint = Vector3f( 0.0, 0.0, 0.0 );
+    viewpoint = vertex3( 0.0, 0.0, 0.0 );
 
-    up = Vector3f( 0.0, 1.0, 0.0 );
+    up = vertex3( 0.0, 1.0, 0.0 );
 
 
     view.identity();
@@ -34,11 +34,11 @@ Camera::~Camera(void)
 /// Determine the camera projection matrix
 void Camera::project( void ) {
 
-    Matrix4 T, R;
+    matrix4 T, R;
 
-    Vector3f U, V, N;
+    vertex3 U, V, N;
 
-    Vector3f Vprime;
+    vertex3 Vprime;
 
 
     Vprime = up;
@@ -49,32 +49,33 @@ void Camera::project( void ) {
     N.normalize();
 
 
-    V = Vprime - ( N * Vector3f::dot( Vprime, N) );
+    V = Vprime - ( N * Vprime.dotProduct(N) );
 
     V.normalize();
 
     //up = V;
 
-    U = Vector3f::cross( N, V );
+    U = N.cross( V );
 
     U.normalize();
 
 
-    Vector3f Vinv = Vector3f::invert( position );
+    vertex3 Vinv = position.invert();
 
 
     T.identity();
 
-    T.setTranslation( Vinv.x(), Vinv.y(), Vinv.z() );
+	//TODO what is this supposed to do?
+    //T.setTranslation( Vinv.x(), Vinv.y(), Vinv.z() );
 
 
     R.identity();
 
-    R(0,0) = U.x();     R(0,1) = U.y();     R(0,2) = U.z();
+    R(0,0) = U.getx();     R(0,1) = U.gety();     R(0,2) = U.getz();
 
-    R(1,0) = V.x();     R(1,1) = V.y();     R(1,2) = V.z();
+    R(1,0) = V.getx();     R(1,1) = V.gety();     R(1,2) = V.getz();
 
-    R(2,0) = N.x();     R(2,1) = N.y();     R(2,2) = N.z();
+    R(2,0) = N.getx();     R(2,1) = N.gety();     R(2,2) = N.getz();
 
 
     view = R * T;
@@ -104,7 +105,7 @@ void Camera::project( void ) {
 
     projection = perspective * view;
 
-    projectionInv = Matrix4::inverse( projection );
+    projectionInv = projection.invert();
 
 }
 

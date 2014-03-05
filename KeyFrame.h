@@ -1,8 +1,6 @@
 #pragma once
 #include <stdio.h>
 #include <iostream>
-#include <Eigen/Dense>
-#include <Eigen/Geometry>
 using namespace Eigen;
 
 class KeyFrame

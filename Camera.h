@@ -1,8 +1,11 @@
-#pragma once
-#include <Eigen/Geometry>
-#include <Eigen/Dense>
 
-using namespace Eigen;
+#ifndef _CAMERA_H_
+#define _CAMERA_H_
+
+
+#pragma once
+#include "vertex3.h"
+#include "matrix4.h"
 
 class Camera
 {
@@ -17,24 +20,26 @@ public:
 
     // Member Data
 
-    Vector3f position;       // location of the camera
+    vertex3 position;       // location of the camera
 
-    Vector3f viewpoint;      // point where camera is focused
-
-
-    Vector3f up;             // the up direction in world frame
+    vertex3 viewpoint;      // point where camera is focused
 
 
-    MatrixX4f view;           // the view matrix
-
-    MatrixX4f perspective;    // the perspective matrix
-
-    MatrixX4f projection;     // the projection matrix
-
-    MatrixX4f projectionInv;  // the inverse projection matrix
+    vertex3 up;             // the up direction in world frame
 
 
-    double near;            // distance to the near clipping plane
+    matrix4 view;           // the view matrix
 
-    double far;             // distance to the far clipping plane
+    matrix4 perspective;    // the perspective matrix
+
+    matrix4 projection;     // the projection matrix
+
+    matrix4 projectionInv;  // the inverse projection matrix
+
+
+    float near;            // distance to the near clipping plane
+
+    float far;             // distance to the far clipping plane
 };
+
+#endif

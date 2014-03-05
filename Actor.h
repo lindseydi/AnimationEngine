@@ -1,30 +1,48 @@
-#pragma once;
-#include "Node.h" //neccesary??
-#include "Joint.h"
+
+#ifndef _ACTOR_H_
+#define _ACTOR_H_
+
+#pragma once
+
+#include "ModelView.h"
+#include "Trajectory.h"
 
 class Actor{
 public:
-	Joint head;			//Not a physical head, but rather the top of the hierarchy
+	//Model
+	ModelView model;
+	Trajectory* path;
 
 	Actor(){
 		//use default constructor which should set it to 0,0,0
-		head = Joint();
+		model = ModelView();
+		path = new Trajectory();
+		model.loadBox(0.3, 0.3, 0.3);	//delete later
 	}
 
-	Actor(Joint root){
+	Actor(ModelView model){
 		//This is the joint that the actor is to start in world space
-		head = root;
+		this->model = model;
+		path = new Trajectory();
 	}
 
+	~Actor(){
+		//don't have to do anything to model, right?
+		delete path;
+	}
+
+	/*
 	void addLink(Node prev, Joint connector){
 		prev.nextJoint = connector;
 
 		//Everything needed for the Joint information should have already been set
 	}
+	*/
 
-	void drawRecursively(){
-		//draw the actor at the timestep?
-
+	void setBasicPath(){
+		path = new Trajectory();
 	}
 
 };
+
+#endif

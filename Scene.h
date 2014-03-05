@@ -1,29 +1,28 @@
+#ifndef _SCENE_H_
+#define _SCENE_H_
+
+
 #pragma once
 #include "Actor.h"
-#include "Camera.h"
+//#include "Camera.h"
 
-class Actor{
+class Scene{
+	private:
+			int total_frames;
 	public:
-		vector<Actor> actors;
-		Camera camera;
-		//time?
+		vector<Actor*> actors;
+		//Camera* camera;
+		int frame;
 
-	Actor(){
-		camera = Camera();
+	Scene(){
+		//camera = new Camera();
+		frame = 0;
 	}
 
-	void drawScene(){
-		//TODO
-
-		//do something with camera
-		//GL_PROJECTION()
-		//camera stuff
-
-
-		//Then draw all of the actors
-		int i;
-		for(i=0; i<actors.size(); i++){
-		//	actors.at(i).draw(time);
-		}
+	~Scene(){
+		while(!actors.empty()) delete actors.back(), actors.pop_back();
 	}
+
 };
+
+#endif

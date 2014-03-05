@@ -1,6 +1,11 @@
+
+#ifndef _MODELVIEW_H_
+#define _MODELVIEW_H_
+
+
 #pragma once
 
-
+//#include <boost/shared_ptr.hpp>
 #include <stdlib.h>
 #include <stdio.h>
 #include <glut.h>
@@ -12,70 +17,78 @@
 #include <fstream>
 #include <string>
 #include <vector>
+
 #include "polygon.h"
+#include "vertex3.h"
 
 using namespace std;
 
 #define PI 3.14159265
 
+//typedef boost::shared_ptr<vertex3> vertex_ptr;
+
+//class polygon;
+
 class ModelView
 {
-	vector <Vector3f> vertices;
-	vector <polygon> edges;
-	vector <Vector3f> normals;
-
 public:
+	
+	vector<vertex3> vertices;
+	vector<polygon> edges;
+	vector<vertex3> normals;	//necessary but difficult to implement
+
 	ModelView(void){
 		vertices.clear();
 		edges.clear();
 		normals.clear();
 	}
-
+	
 	ModelView(string filename){
 		read_file(filename);
 	}
 
 	ModelView(int vert_count, int edge_count){
-		vertices.resize(vert_count);
+		//vertices.resize(vert_count);			//how to size a shared_ptr?
 		normals.resize(vert_count);
 		edges.resize(edge_count);
 	}
 
-	Vector3f calcTriangleNorm(Vector3f vec0, Vector3f vec1, Vector3f vec2)
+	~ModelView(){
+		//Necessary?
+	}
+
+	void loadBox(float length, float width, float height){
+		//create polygons and vertices
+		vertices.push_back(vertex3(-length/2, -width/2, -height/2));
+		vertices.push_back(vertex3(length/2, -width/2, -height/2));
+		vertices.push_back(vertex3(length/2, -width/2, height/2));
+		vertices.push_back(vertex3(-length/2, -width/2, height/2));
+
+		vertices.push_back(vertex3(-length/2, width/2, -height/2));
+		vertices.push_back(vertex3(length/2, width/2, -height/2));
+		vertices.push_back(vertex3(length/2, width/2, height/2));
+		vertices.push_back(vertex3(-length/2, width/2, height/2));	
+
+		//TODO fix error
+		edges.push_back(polygon(0, 1, 2, 3));
+		edges.push_back(polygon(0, 4, 5, 1));
+		edges.push_back(polygon(0, 3, 7, 4));
+		edges.push_back(polygon(6, 5, 4, 7));
+		edges.push_back(polygon(6, 7, 3, 2));
+		edges.push_back(polygon(6, 2, 1, 5));
+	}
+
+vertex3 calcTriangleNorm(vertex3 vec0, vertex3 vec1, vertex3 vec2)
 {
-	Vector3f edge1 = vec1 - vec0;
+	vertex3 edge1 = vec1 - vec0;
 	edge1.normalize();
-	Vector3f edge2 = vec2 - vec0;
+	vertex3 edge2 = vec2 - vec0;
 	edge2.normalize();
-	Vector3f normal = edge1.cross(edge2);
+	vertex3 normal = edge1.cross(edge2);
 	normal.normalize();
 	return normal;
 }
 
-void generatenormals(void){
-	int i;
-	for(i=0; i<vertices.size(); i++){
-		normals[i].x =0.0f;
-		normals[i].y = 0.0f;
-		normals[i].z = 0.0f;
-	}
-	
-	for(i=0; i<edges.size(); i++){
-		int type = edges[i].getType();
-		int firstv = edges[i].geta();
-		int secondv = edges[i].getb();
-		int thirdv = edges[i].getc();
-		int fourthv = edges[i].getd();
-		Vector3f normal = calcTriangleNorm(vertices[firstv], vertices[secondv], vertices[thirdv]);
-			normals[firstv] = normals[firstv] + normal;
-			normals[secondv] = normals[secondv] + normal;
-			normals[thirdv] = normals[thirdv] + normal;
-			normals[fourthv] = normals[fourthv] + normal;
-	}
-	for(i=0; i<vertices.size(); i++){
-		normals[i].normalize();
-	}
-}
 	void read_file(string filename)
 {
 	int vert_count;
@@ -91,7 +104,7 @@ void generatenormals(void){
 	inFile >> str;
 	inFile >> str;
 	vert_count = atoi(str.c_str());
-	//Vector3f *vertices = ((Vector3f*)  malloc(vert_count*sizeof(Vector3f)));
+	//vertex3 *vertices = ((vertex3*)  malloc(vert_count*sizeof(vertex3)));
 	inFile >> str;
 	edge_count = atoi(str.c_str());
 	float x, y, z;
@@ -99,6 +112,7 @@ void generatenormals(void){
 
 	vertices.resize(vert_count);
 	normals.resize(vert_count);
+	//no i necessary
 	for(i=0; i<vert_count; i++){
 		inFile >> str;
 		x = (GLfloat) atof( str.c_str());
@@ -106,8 +120,8 @@ void generatenormals(void){
 		y = (GLfloat) atof(str.c_str());
 		inFile >> str;
 		z = (GLfloat) atof(str.c_str());
-		Vector3f vertex(x, y, z);
-		vertices[ i ] = vertex;
+		vertices.push_back(vertex3(x, y, z));
+		//vertices.at(i) = vertex3(x, y, z);
 	}
 	edges.resize(edge_count);
 	for(i=0; i<edge_count; i++){
@@ -122,9 +136,11 @@ void generatenormals(void){
 			inFile >> str;
 			int c = atoi(str.c_str()) -1;
 
-			//Put this information into the global vector connect
-			polygon poly(a, b, c);
-			edges[i] = poly;
+			//Put this information into the global vector edges
+			//TODO learn about pointers
+			polygon poly = polygon(a, b, c);
+			edges[i] = poly;	//interesting
+			normals.at(a) = normals.at(a) + poly.normal;	//replaces generatenormals function
 		}
 		//rectangle
 		if(numEdges == 4){
@@ -137,12 +153,12 @@ void generatenormals(void){
 			inFile >> str;
 			int d = atoi(str.c_str()) -1;
 
-			polygon poly(a, b, c, d);
+			polygon poly = polygon(a, b, c, d);
 			edges[i] = poly;
+			normals.at(a) = normals.at(a) + poly.normal;
 		}
 	}
 
-	generatenormals();
 }
 
 void texture_object(int m){
@@ -153,6 +169,7 @@ void texture_object(int m){
 	glBindTexture( GL_TEXTURE_2D, m_wall_texture_id);
 }
 
+/*
 void draw_object(float obj_colorR, float obj_colorG, float obj_colorB)
 {
 	int i;
@@ -177,32 +194,32 @@ void draw_object(float obj_colorR, float obj_colorG, float obj_colorB)
 				glVertex3fv (vertices[secondv].getPointer());
 				glNormal3fv(normals[thirdv].getPointer());
 				glVertex3fv (vertices[thirdv].getPointer());
-	 }
-	 if(typepoly == 4){
-	 	glBegin (GL_QUADS);
-		firstv = edges[i].geta();
-		secondv = edges[i].getb();
-		thirdv = edges[i].getc();
-		fourthv = edges[i].getd();
-			glColor3f(obj_colorR, obj_colorG, obj_colorB);
-			glNormal3fv(normals[firstv].getPointer());
-			glTexCoord2f( 0.0f, 0.0f );
-			glVertex3fv (vertices[firstv].getPointer());
-			glNormal3fv(normals[secondv].getPointer());
-			glTexCoord2f(1.0f, 0.0f);
-			glVertex3fv (vertices[secondv].getPointer());
-			glNormal3fv(normals[thirdv].getPointer());
-			glTexCoord2f(1.0f, 1.0f);
-			glVertex3fv (vertices[thirdv].getPointer());
-			glNormal3fv(normals[fourthv].getPointer());
-			glTexCoord2f(0.0f, 1.0f);
-			glVertex3fv (vertices[fourthv].getPointer());
-			vertices[firstv].print();
-			vertices[secondv].print();
-			vertices[thirdv].print();
-			vertices[fourthv].print();
-	 }
-     glEnd();
+		}
+		if(typepoly == 4){
+	 		glBegin (GL_QUADS);
+			firstv = edges[i].geta();
+			secondv = edges[i].getb();
+			thirdv = edges[i].getc();
+			fourthv = edges[i].getd();
+				glColor3f(obj_colorR, obj_colorG, obj_colorB);
+				glNormal3fv(normals[firstv].getPointer());
+				glTexCoord2f( 0.0f, 0.0f );
+				glVertex3fv (vertices[firstv].getPointer());
+				glNormal3fv(normals[secondv].getPointer());
+				glTexCoord2f(1.0f, 0.0f);
+				glVertex3fv (vertices[secondv].getPointer());
+				glNormal3fv(normals[thirdv].getPointer());
+				glTexCoord2f(1.0f, 1.0f);
+				glVertex3fv (vertices[thirdv].getPointer());
+				glNormal3fv(normals[fourthv].getPointer());
+				glTexCoord2f(0.0f, 1.0f);
+				glVertex3fv (vertices[fourthv].getPointer());
+				vertices[firstv].print();
+				vertices[secondv].print();
+				vertices[thirdv].print();
+				vertices[fourthv].print();
+		 }
+		glEnd();
 	}
 	glDisable( GL_TEXTURE_2D );
 
@@ -217,16 +234,8 @@ void draw_object(float obj_colorR, float obj_colorG, float obj_colorB)
 	}
     glEnd();
     //#endif
-	
-	/*
-	if(chess){
-	//Rotate back to normal and draw a teapot
-	glRotatef(90.0, 1.0, 0.0, 0.0);
-	glTranslatef(-transX, -transY, -transZ);
-	}
+}
 	*/
-	//glTranslatef(0,-8,-4.5);
-	//glutSolidTeapot(2);
-}		
 };
 
+#endif

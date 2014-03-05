@@ -1,24 +1,31 @@
+#ifndef _QUATERNION_H_
+#define _QUATERNION_H_
+
+
 #pragma once
 #include "vertex3.h"
+#include <Eigen/Geometry>
 #include <math.h>
+#include "matrix4.h"
+//Needed for Quaternionf
+using namespace Eigen;
 
 class quaternion{
 public:
-		//Quaternion elements
-		float X; 
-		float Y;
-		float Z;
-		float W; // real part
-
-
+	Quaternionf quat;
 	//Default Constructor
-	quaternion() : X(0.0), Y(0.0), Z(0.0), W(1.0) {}
+	quaternion() {
+		quat.x() = 0.0f;
+		quat.y() = 0.0f;
+		quat.z() = 0.0f;
+		quat.w() = 0.0f;
+	}
 	//! Constructor
 	quaternion(float x, float y, float z, float w) {
-		this->X = x;
-		this->Y = y;
-		this->Z = z;
-		this->W = w;
+		this->quat.x() = x;
+		this->quat.y() = y;
+		this->quat.z() = z;
+		this->quat.w() = w;
 	}
 
 	//! Constructor which converts euler angles (radians) to a quaternion
@@ -28,7 +35,7 @@ public:
 
 	//! Constructor which converts euler angles (radians) to a quaternion
 	quaternion(const vertex3& vec){ 
-		*this = set(vec.x, vec.y, vec.z);
+		*this = set(vec.vertex.x(), vec.vertex.y(), vec.vertex.z());
 	}
 
 	~quaternion(void){
@@ -37,10 +44,10 @@ public:
 
 	quaternion& set(float x, float y, float z, float w)
 	{
-		X = x;
-		Y = y;
-		Z = z;
-		W = w;
+		this->quat.x() = x;
+		this->quat.y() = y;
+		this->quat.z() = z;
+		this->quat.w() = w;
 		return *this;
 	}
 
@@ -67,80 +74,92 @@ public:
 		const float cpsy = cp * sy;
 		const float spsy = sp * sy;
 
-		X = (float)(sr * cpcy - cr * spsy);
-		Y = (float)(cr * spcy + sr * cpsy);
-		Z = (float)(cr * cpsy - sr * spcy);
-		W = (float)(cr * cpcy + sr * spsy);
+		quat.x() = (float)(sr * cpcy - cr * spsy);
+		quat.y() = (float)(cr * spcy + sr * cpsy);
+		quat.z() = (float)(cr * cpsy - sr * spcy);
+		quat.w() = (float)(cr * cpcy + sr * spsy);
 
 		return normalize();
 	}
 
+	float getx(){
+		return quat.x();
+	}
+
+	float gety(){
+		return quat.y();
+	}
+
+	float getz(){
+		return quat.z();
+	}
+	
+	float getw(){
+		return quat.w();
+	}
 quaternion& quaternion::normalize()
 {
+		/*
 		float magnitude = sqrt(W*W + X*X + Y*Y + Z*Z);
-		this->W = this->W / magnitude;
+		this-> = this->W / magnitude;
 		this->X = this->X /  magnitude;
 		this->Y = this->Y / magnitude;
 		this->Z = this->Z / magnitude;
+		*/
 
+		this->quat.normalize();
 		return *this;
 }
 
 quaternion& operator=(const quaternion& other)
 {
-	this->X = other.X;
-	this->Y = other.Y;
-	this->Z = other.Z;
-	this->W = other.W;
+	this->quat = other.quat;
 	return *this;
 }
 
 	// multiplication operator
 quaternion operator*(const quaternion& input) const
 {
-	quaternion tmp;
+	quaternion temp;
 
-	tmp.W = (input.W * W) - (input.X * X) - (input.Y * Y) - (input.Z * Z);
-	tmp.X = (input.W * X) + (input.X * W) + (input.Y * Z) - (input.Z * Y);
-	tmp.Y = (input.W * Y) + (input.Y * W) + (input.Z * X) - (input.X * Z);
-	tmp.Z = (input.W * Z) + (input.Z * W) + (input.X * Y) - (input.Y * X);
-
-	//returns a new quaternion instead of alterning the input
-	return tmp;
+	temp.quat = this->quat * input.quat;
+	return temp;
 }
 
 
 // multiplication operator
 quaternion operator*(float scalar) const
 {
-	return quaternion(scalar*X, scalar*Y, scalar*Z, scalar*W);
+
+	return quaternion(scalar*quat.x(), scalar*quat.y(), scalar*quat.z(), scalar*quat.w());
 }
 
 
 //*= multiplication operator
 quaternion& quaternion::operator*=(float scalar)
 {
-	this->X *=scalar;
-	this->Y *=scalar;
-	this->Z *=scalar;
-	this->W *=scalar;
+	this->quat.x() *=scalar;
+	this->quat.y() *=scalar;
+	this->quat.z() *=scalar;
+	this->quat.w() *=scalar;
 	return *this;
 }
 
 //*= multiplication operator
 quaternion& operator*=(const quaternion& input)
 {
-	return *this = (input * (*this));
+	this->quat *= input.quat;
+	return *this;
 }
 
 quaternion& rotate(float angle, vertex3 axis){
 	quaternion local_rotation;
 
 	//axis is a unit vector
-	local_rotation.W  = cosf( angle/2);
-	local_rotation.X = axis.x * sinf( angle/2 );
-	local_rotation.Y = axis.y * sinf( angle/2 );
-	local_rotation.Z = axis.z * sinf( angle/2 );
+	local_rotation.quat.w()  = cosf( angle/2);
+	local_rotation.quat.x() = axis.vertex.x() * sinf( angle/2 );
+	local_rotation.quat.y() = axis.vertex.y() * sinf( angle/2 );
+	local_rotation.quat.z() = axis.vertex.z() * sinf( angle/2 );
 
 	*this *= local_rotation;
 	return *this;
@@ -148,18 +167,22 @@ quaternion& rotate(float angle, vertex3 axis){
 
 quaternion& rotate(float angle, float axisX, float axisY, float axisZ){
 	quaternion local_rotation;
-
+	
 	//axis is a unit vector
-	local_rotation.W  = cosf( angle/2);
-	local_rotation.X = axisX * sinf( angle/2 );
-	local_rotation.Y = axisY * sinf( angle/2 );
-	local_rotation.Z = axisZ * sinf( angle/2 );
+	local_rotation.quat.w()  = cosf( angle/2);
+	local_rotation.quat.x() = axisX * sinf( angle/2 );
+	local_rotation.quat.y() = axisY * sinf( angle/2 );
+	local_rotation.quat.z() = axisZ * sinf( angle/2 );
+//	Quaternionf<float, 0> current_rotation =  this->quat.toRotationMatrix();
+
 
 	return (*this = (local_rotation) * (*this));
 }
 
-float dotProduct(quaternion& input){
-	return (this->X * input.X) + (this->Y * input.Y) + (this->Z * input.Z) + (this->W * input.W);
+float dot(quaternion& input){
+	//return (this->X * input.X) + (this->Y * input.Y) + (this->Z * input.Z) + (this->W * input.W);
+	float retVal = this->quat.dot(input.quat);
+	return retVal;
 }
 
 /*
@@ -201,8 +224,15 @@ quaternion& slerp(quaternion a, quaternion b, float u)
     }
 */
 
-matrix getRotation(){
-	matrix rot(4,4);
+matrix4 getRotation(){
+	//TODO 
+	//test this!
+	float X =  quat.x();
+	float Y =  quat.y();
+	float Z =  quat.z();
+	float W =  quat.w();
+
+	matrix4 rot;
 	rot(0,0) = 1-2*Y*Y -2*Z*Z;
 	rot(0,1) = 2*X*Y - 2*W*Z;
 	rot(0,2) = 2*X*Z + 2*W*Y;
@@ -215,9 +245,11 @@ matrix getRotation(){
 	rot(2,1) = 2*Y*Z + 2*W*X;
 	rot(2,2) = 1- 2*X*X - 2*Y*Y;
 
-	rot(3,3) = 1.0;
-
+	rot.matrix(3,3) = 1.0;
 	return rot;
 }
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 };
+
+#endif

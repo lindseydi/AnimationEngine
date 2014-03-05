@@ -31,10 +31,6 @@ public:
 		this->articulation = articulation;
 	}
 
-	void draw(){
-		model.draw_object(0.0, 1.0, 1.0);
-	}
-
 	void setArticulation(float pitch, float yaw, float roll){
 		articulation.x = pitch;
 		articulation.y = yaw;

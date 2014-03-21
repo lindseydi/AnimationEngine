@@ -27,7 +27,7 @@ class Trajectory{
 
 		void init(){
 			u = 0;	//local frame
-			cpIndex = 0;
+			cpIndex = 1;
 			//curFrame = globalFrame?
 			forward = true;
 			end = false;
@@ -87,7 +87,6 @@ class Trajectory{
 				return index;
 		}
 
-
 	public:
 		vector<PoseKey*> controlPoints;
 		cubicSpline splineType;
@@ -140,69 +139,74 @@ class Trajectory{
 			int k0, k1, k2, k3;
 			k0 = k1 = k2 = k3 = 0;
 			//implies forward because u is >
-			//printf("cpIndex = %d ----- u = %d ----- startFrame = %d -------- endFrame = %d \n", cpIndex, u, startFrame, endFrame);
-			if((u > endFrame) && forward ){
-				startFrame = controlPoints.at(cpIndex)->frame;
+			printf("CpIndex = %d ----- u = %d ----- startFrame = %d -------- endFrame = %d \n", cpIndex, u, startFrame, endFrame);
+			if(cycleType!= circle && (u >= endFrame) && forward && cpIndex < (controlPoints.size() - 1)){
+				startFrame = endFrame;
 				cpIndex++;
 				endFrame = controlPoints.at(clampIndex(cpIndex))->frame;
 				u = startFrame;
-			}else if((u < endFrame) && !forward){
+			}else if((u <= endFrame) && !forward && cpIndex > 0){
 				//Should only reach this point if moving backwards aka !forward
-				startFrame = controlPoints.at(clampIndex(cpIndex))->frame;
+				startFrame = endFrame;
 				cpIndex--;
 				endFrame = controlPoints.at(clampIndex(cpIndex))->frame;
 				u = startFrame;
-			}else{
-				//circle, pendulum, clamp
-				switch(cycleType){
-					case circle:
-						cpIndex = cpIndex % controlPoints.size()-1;
-						k0 = clampIndex(cpIndex - 1);	//clampIndex should do nothing
-						k1 = clampIndex(cpIndex);		//clampIndex should do nothing for all
-						k2 = clampIndex(cpIndex + 1);
-						k3 = clampIndex(cpIndex + 2);
-					break;
-					case pendulum:
-						if(forward){
-							k0 = clampIndex(cpIndex - 1);
-							k1 = clampIndex(cpIndex);
-							k2 = clampIndex(cpIndex + 1);
-							k3 = clampIndex(cpIndex + 2);
-							if(k1 == k3){
-								forward = false;
-							if(k1 == k2)
-								end = true;
-		//						endFrame = controlPoints.at(k3-1)->frame;
-			//					startFrame = controlPoints.at(k3)->frame;
-							}
-						}else{
-							k0 = clampIndex(cpIndex + 1);
-							k1 = clampIndex(cpIndex);
-							k2 = clampIndex(cpIndex - 1);
-							k3 = clampIndex(cpIndex - 2);
-							if(k1 == k3 && u==endFrame)
-								forward = true;
-						}
-					break;
-					case clamp:
-						k0 = clampIndex(cpIndex - 1);
-						k1 = clampIndex(cpIndex);
-						k2 = clampIndex(cpIndex +1);
-						k3 = clampIndex(cpIndex + 2);
-
-						if(k1 == k2)
-							end = true;
-					break;
-					default:
-						printf("No cycle Type is chosen");
-					break;
-
+			}else if((u >= endFrame) && forward){
+				//do not have to check index, because it will be modded to stay safe
+				startFrame = controlPoints.at(clampIndex(cpIndex))->frame;
+				cpIndex++;
+				endFrame = controlPoints.at(clampIndex(cpIndex))->frame;
+				u = startFrame;
+			}	
+			//circle, pendulum, clamp
+			switch(cycleType){
+				case circle:{
+					//Must use brackets because we define a variable for scope reasons
+					int size = controlPoints.size()-1;
+					cpIndex = cpIndex % size;
+					k0 = (cpIndex-1) % size;	//clampIndex should do nothing
+					k1 = cpIndex;	//clampIndex should do nothing for all
+					k2 = (cpIndex+1) % size;
+					k3 = (cpIndex+2) % size;
+					if(k2 == size)
+						end = true;
 				}
+				break;
+				case pendulum:
+					if(forward){
+						k0 = clampIndex(cpIndex - 2);
+						k1 = clampIndex(cpIndex-1);
+						k2 = clampIndex(cpIndex);
+						k3 = clampIndex(cpIndex + 1);
+						if((k2 == k3) && (u >= endFrame)){
+							forward = false;
+							end = true;
+						}
+					}else{
+						k0 = clampIndex(cpIndex + 2);
+						k1 = clampIndex(cpIndex +1);
+						k2 = clampIndex(cpIndex);
+						k3 = clampIndex(cpIndex - 1);
+						if(k2 == k3 && u<=endFrame)
+							forward = true;
+					}
+				break;
+				case clamp:
+					k0 = clampIndex(cpIndex - 1);
+					k1 = clampIndex(cpIndex);
+					k2 = clampIndex(cpIndex +1);
+					k3 = clampIndex(cpIndex + 2);
+					if(k1 == k2 && u>=endFrame)
+						end = true;
+				break;
+				default:
+					printf("No cycle Type is chosen");
+				break;
 			}
 			
 			float u_norm;			//TODO rethink
 			if(forward){
-				u_norm = (float)(u -startFrame) / (endFrame- startFrame);
+				u_norm = abs((float)(u -startFrame) / (float)(endFrame- startFrame));
 				//printf("Forward U_Norm ------- %f--------------%d - %d/ (%d - %d) \n", u_norm, u, startFrame, endFrame, startFrame);
 			}
 			else{

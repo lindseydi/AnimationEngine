@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include <boost/shared_ptr.hpp>
-
 #include <vector>
 
 enum PolygonType{point = 1, line, triangle, quad, pentagon };

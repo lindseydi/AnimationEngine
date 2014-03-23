@@ -20,12 +20,14 @@ public:
 		vertex.x() = 0.0f;
 		vertex.y() = 0.0f;
 		vertex.z() = 0.0f;
-	}	
+	}
+
 	vertex3 (float value){
 		vertex.x() = value;
 		vertex.y() = value;
 		vertex.z() = value;
 	}
+
 	vertex3(float xin, float yin, float zin){
 		vertex.x() = xin;
 		vertex.y() = yin;

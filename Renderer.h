@@ -105,7 +105,7 @@ public:
 			//cout << "The matrix transform is:" << endl << transform.matrix << endl;
 
 			applyTransformation(transform);		
-			glutSolidTeapot(0.3);
+			//glutSolidTeapot(0.3);
 			draw(*model);
 		glPopMatrix();		
 	}

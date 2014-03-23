@@ -253,7 +253,7 @@ int main( int argc, char** argv ) {
 	// init
 	init();
 	box = ModelView();
-	box.loadBox(1.0, 1.0, 1.0);
+	//box.loadBox(1.0, 1.0, 1.0);
 	  
 	// set callback functions
 	glutDisplayFunc( render );

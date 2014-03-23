@@ -17,7 +17,7 @@ public:
 		//use default constructor which should set it to 0,0,0
 		model = ModelView();
 		path = new Trajectory();
-		model.loadBox(0.3, 0.3, 0.3);	//delete later
+		model.loadBox(1.0, 1.0, 1.0);	//delete later
 	}
 
 	Actor(ModelView model){

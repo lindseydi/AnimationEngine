@@ -20,7 +20,9 @@ public:
 	}
 
 	polygon(const polygon& poly){
-		//copy constructor
+		type = poly.type;
+		vertexIndices = poly.vertexIndices;
+		normal = poly.normal;
 	}
 
 	polygon(vector<int> vertexIndices){
@@ -29,7 +31,7 @@ public:
 			this->vertexIndices.push_back(vertexIndices.at(i));
 		}
 		type = (PolygonType)vertexIndices.size();
-		calcNorm();
+		//calcNorm();
 	}
 
 	polygon(int a, int b, int c){
@@ -37,6 +39,7 @@ public:
 		vertexIndices.push_back(b);
 		vertexIndices.push_back(c);
 		type = triangle;
+		//calcNorm();
 	}
 
 	polygon(int a, int b, int c, int d){
@@ -45,6 +48,17 @@ public:
 		vertexIndices.push_back(c);
 		vertexIndices.push_back(d);
 		type = quad;
+		//calcNorm();
+	}
+
+	polygon(int a, int b, int c, int d, vertex3 normal){
+		vertexIndices.push_back(a);
+		vertexIndices.push_back(b);
+		vertexIndices.push_back(c);
+		vertexIndices.push_back(d);
+		type = quad;
+		this->normal = normal;
+		//calcNorm();
 	}
 	
 	int getType (void){

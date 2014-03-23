@@ -59,7 +59,10 @@ public:
 
 	void loadBox(float length, float width, float height){
 		//create polygons and vertices
-		vertices.push_back(vertex3(-length/2, -width/2, -height/2));
+		float halfLen = length/2;
+		float halfWidth = width/2;
+		float halfHeight = height/2;
+		vertices.push_back(vertex3(-halfLen, -width/2, -height/2));
 		vertices.push_back(vertex3(length/2, -width/2, -height/2));
 		vertices.push_back(vertex3(length/2, -width/2, height/2));
 		vertices.push_back(vertex3(-length/2, -width/2, height/2));
@@ -70,12 +73,12 @@ public:
 		vertices.push_back(vertex3(-length/2, width/2, height/2));	
 
 		//TODO fix error
-		edges.push_back(polygon(0, 1, 2, 3));
-		edges.push_back(polygon(0, 4, 5, 1));
-		edges.push_back(polygon(0, 3, 7, 4));
-		edges.push_back(polygon(6, 5, 4, 7));
-		edges.push_back(polygon(6, 7, 3, 2));
-		edges.push_back(polygon(6, 2, 1, 5));
+		edges.push_back(polygon(0, 1, 2, 3, calcTriangleNorm(0, 1, 2)));
+		edges.push_back(polygon(0, 1, 5, 4, calcTriangleNorm(0, 1, 5)));
+		edges.push_back(polygon(0, 3, 7, 4, calcTriangleNorm(0, 3, 7)));
+		edges.push_back(polygon(6, 7, 4, 5, calcTriangleNorm(6, 7, 4)));
+		edges.push_back(polygon(6, 5, 1, 2, calcTriangleNorm(6, 5, 1)));
+		edges.push_back(polygon(6, 7, 3, 2, calcTriangleNorm(6, 7, 3)));
 	}
 
 vertex3 calcTriangleNorm(vertex3 vec0, vertex3 vec1, vertex3 vec2)
@@ -87,6 +90,26 @@ vertex3 calcTriangleNorm(vertex3 vec0, vertex3 vec1, vertex3 vec2)
 	vertex3 normal = edge1.cross(edge2);
 	normal.normalize();
 	return normal;
+}
+
+vertex3 calcTriangleNorm(polygon poly){
+	vertex3 edge1 = vertices.at(poly.vertexIndices.at(1)) - vertices.at(poly.vertexIndices.at(0));
+	edge1.normalize();
+	vertex3 edge2 = vertices.at(poly.vertexIndices.at(2)) - vertices.at(poly.vertexIndices.at(0));
+	edge2.normalize();
+	vertex3 local_normal = edge1.cross(edge2);
+	local_normal.normalize();
+	return local_normal;
+}
+
+vertex3 calcTriangleNorm(int a, int b, int c){
+	vertex3 edge1 = vertices.at(b) - vertices.at(a);
+	edge1.normalize();
+	vertex3 edge2 = vertices.at(c) - vertices.at(a);
+	edge2.normalize();
+	vertex3 local_normal = edge1.cross(edge2);
+	local_normal.normalize();
+	return local_normal;
 }
 
 	void read_file(string filename)

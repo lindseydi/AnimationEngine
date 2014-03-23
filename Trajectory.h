@@ -38,6 +38,8 @@ class Trajectory{
 		}
 
 		void generateControlPoints(){
+			
+			/*
 			controlPoints.push_back(new PoseKey(-1.0,	0.0,	0.0,	90.0,	0.0,	0.0,	 0));
 			controlPoints.push_back(new PoseKey(-1.5,	0.70,	0.0,	65.0,	0.0,	-20.0,	30));
 			controlPoints.push_back(new PoseKey(-0.7,	0.5,	0.0,	85.0,	0.0,	0.0,	60));
@@ -46,8 +48,18 @@ class Trajectory{
 			controlPoints.push_back(new PoseKey(0.5,	0.0,	0.0,	65.0,	90.0,	0.0,	150));
 			controlPoints.push_back(new PoseKey(0.75,	-0.5,	0.0,	30.0,	0.0,	0.0,	180));
 			controlPoints.push_back(new PoseKey(0.25,	1.5,	0.0,	85.0,	0.0,	0.0,	210));
-			controlPoints.push_back(new PoseKey(0.0,	0.5,	0.0,	85.0,	0.0,	20.0,	 240));
+			controlPoints.push_back(new PoseKey(0.0,	0.5,	0.0,	85.0,	0.0,	20.0,	240));
 			controlPoints.push_back(new PoseKey(-1.25, -0.5,	0.0,	-35.0,	0.0,	0.0,	270));
+			*/
+
+			controlPoints.push_back(new PoseKey(-1.5,	0.0,	0.0,	0.0,	10.0,	0.0,	 0));
+			controlPoints.push_back(new PoseKey(-1.0,	0.0,	0.0,	0.0,	0.0,	0.0,	30));
+			controlPoints.push_back(new PoseKey(-0.5,	0.0,	-2.5,	0.0,	0.0,	0.0,	60));
+			controlPoints.push_back(new PoseKey(0.0,	0.0,	0.0,	0.0,	45.0,	0.0,	90));
+			controlPoints.push_back(new PoseKey(0.5,	0.0,	0.0,	0.0,	0.0,	0.0,	120));
+			controlPoints.push_back(new PoseKey(1.0,	0.0,	0.0,	0.0,	0.0,	0.0,	150));
+			controlPoints.push_back(new PoseKey(1.5,	0.0,	2.0,	0.0,	0.0,	0.0,	180));
+
 		}
 		/*
 		void drawKeys(void){
@@ -139,7 +151,7 @@ class Trajectory{
 			int k0, k1, k2, k3;
 			k0 = k1 = k2 = k3 = 0;
 			//implies forward because u is >
-			printf("CpIndex = %d ----- u = %d ----- startFrame = %d -------- endFrame = %d \n", cpIndex, u, startFrame, endFrame);
+			//printf("CpIndex = %d ----- u = %d ----- startFrame = %d -------- endFrame = %d \n", cpIndex, u, startFrame, endFrame);
 			if(cycleType!= circle && (u >= endFrame) && forward && cpIndex < (controlPoints.size() - 1)){
 				startFrame = endFrame;
 				cpIndex++;

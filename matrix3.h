@@ -14,8 +14,8 @@ public:
 	Matrix3f matrix;
 	//Constructors
 	void zero(){
-		for(int i=0; i<3; i++){
-			for(int j=0; j<3; j++){
+		for(unsigned int i=0; i<3; i++){
+			for(unsigned int j=0; j<3; j++){
 				this->matrix(i, j) = 0.0f;
 			}
 		}
@@ -68,8 +68,8 @@ public:
 	}
 
 	void print(){
-		for(int i=0; i<3; ++i){
-			for(int j=0; j<3; ++j){
+		for(unsigned int i=0; i<3; ++i){
+			for(unsigned int j=0; j<3; ++j){
 				printf("%f ", matrix(i, j));
 			}
 		printf("\n");

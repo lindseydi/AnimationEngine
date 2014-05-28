@@ -19,8 +19,8 @@ public:
 	//Constructors
 
 	void zero(){
-		for(int i=0; i<4; i++){
-			for(int j=0; j<4; j++){
+		for(unsigned int i=0; i<4; ++i){
+			for(unsigned int j=0; j<4; ++j){
 				this->matrix(i, j) = 0.0f;
 			}
 		}
@@ -30,6 +30,35 @@ public:
 		matrix = Matrix4f();
 		this->zero();
 		//matrix.Zero();
+	}
+
+	matrix4(float number){
+		//does nothing with the float at all.
+		matrix = Matrix4f();
+		this->identity();
+		//matrix.Zero();
+	}
+
+	matrix4(float a, float b, float c, float d, 
+			float aa, float bb, float cc, float dd,
+			float aaa, float bbb, float ccc, float ddd,
+			float aaaa, float bbbb, float cccc, float dddd){
+				matrix(0, 0) = a;
+				matrix(0, 1) = b;
+				matrix(0, 2) = c;
+				matrix(0,3) = d;
+				matrix(1, 0) = aa;
+				matrix(1, 1) = bb;
+				matrix(1, 2) = cc;
+				matrix(1, 3) = dd;
+				matrix(2, 0) = aaa;
+				matrix(2, 1) = bbb;
+				matrix(2, 2) = ccc;
+				matrix(2, 3) = ddd;
+				matrix(3, 0) = aaaa;
+				matrix(3, 1) = bbbb;
+				matrix(3, 2) = cccc;
+				matrix(3, 3) = dddd;
 	}
 
 	matrix4(const matrix4& mat){
@@ -60,7 +89,7 @@ public:
 
 	void identity(){
 		//TODO check that this will set teh matrix to it's identity
-		this->matrix.Identity();
+		this->matrix = this->matrix.Identity();
 	}
 
 	//Is this the correct direction?
@@ -71,7 +100,7 @@ public:
 	}
 
 	matrix4 operator*(const matrix4& other){
-		matrix4 retVal;
+		matrix4 retVal  = matrix4();
 		retVal.matrix = matrix * other.matrix;
 		return retVal;
 	}
@@ -100,8 +129,8 @@ public:
 	}
 
 	void print(){
-		for(int i=0; i<4; ++i){
-			for(int j=0; j<4; ++j){
+		for(unsigned int i=0; i<4; ++i){
+			for(unsigned int j=0; j<4; ++j){
 				printf("%f ", matrix(i, j));
 			}
 		printf("\n");
@@ -116,8 +145,8 @@ public:
 	//Will this work?
 	GLfloat* getGLPtr(){
 		GLfloat* ret = new GLfloat[16];
-		for(int i=0; i<4; ++i){
-			for(int j=0; j<4; ++j){
+		for(unsigned int i=0; i<4; ++i){
+			for(unsigned int j=0; j<4; ++j){
 				ret[i*j] = (GLfloat)this->matrix(i, j);
 			}
 		}
@@ -126,8 +155,8 @@ public:
 
 	// return an array that openGL can understand
 	void ToArray(float *m) {
-		for ( int i = 0; i < 4; i++ ) {
-			for ( int j = 0; j < 4; j++ ) {
+		for ( int i = 0; i < 4; ++i ) {
+			for ( int j = 0; j < 4; ++j ) {
 				m[ i * 4 + j ] = this->matrix( i, j);
 			}
 		}

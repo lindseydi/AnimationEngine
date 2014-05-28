@@ -137,22 +137,29 @@
     </Bscmake>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Joint.cpp" />
     <ClCompile Include="lab02.cpp" />
     <ClCompile Include="lab03.cpp" />
     <ClCompile Include="lab04.cpp" />
     <ClCompile Include="lab05.cpp" />
-    <ClCompile Include="SimpleGlut.cpp" />
+    <ClCompile Include="lab01.cpp" />
+    <ClCompile Include="Link.cpp" />
     <ClCompile Include="StdAfx.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Trajectory.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h" />
+    <ClInclude Include="Flock.h" />
+    <ClInclude Include="Joint.h" />
+    <ClInclude Include="Link.h" />
     <ClInclude Include="matrix3.h" />
     <ClInclude Include="matrix4.h" />
+    <ClInclude Include="Model.h" />
     <ClInclude Include="ModelView.h" />
     <ClInclude Include="polygon.h" />
     <ClInclude Include="Pose.h" />

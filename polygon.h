@@ -34,11 +34,12 @@ public:
 		//calcNorm();
 	}
 
-	polygon(int a, int b, int c){
+	polygon(int a, int b, int c, vertex3 normal){
 		vertexIndices.push_back(a);
 		vertexIndices.push_back(b);
 		vertexIndices.push_back(c);
 		type = triangle;
+		this->normal = normal;
 		//calcNorm();
 	}
 
@@ -66,6 +67,23 @@ public:
 		return type;
 	}
 
+	void setNormal(vertex3 normal){
+		this->normal = normal;
+		getType();
+	}
+
+	void flip( void ) {
+		std::vector<int> tempvertices;
+		int m_vertexCount = vertexIndices.size();
+		for( unsigned int i = 0; i < m_vertexCount; i++ ) {
+			tempvertices.push_back( vertexIndices.at( i ) );
+		}
+		vertexIndices.erase( vertexIndices.begin( ), vertexIndices.end() );
+		for( unsigned int i = m_vertexCount; i > 0; i-- ) {
+			vertexIndices.push_back( tempvertices.at( i - 1 ) );
+		}
+	}
+
 	void calcNorm()
 	{
 		//true for any plane
@@ -77,6 +95,10 @@ public:
 			vertex3 local_normal = edge1.cross(edge2);
 			local_normal.normalize();
 			this->normal = local_normal;
+	}
+
+	void addVertex(int index){
+		vertexIndices.push_back(index);
 	}
 };
 

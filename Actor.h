@@ -17,18 +17,23 @@ public:
 		//use default constructor which should set it to 0,0,0
 		model = ModelView();
 		path = new Trajectory();
-		model.loadBox(1.0, 1.0, 1.0);	//delete later
+		path->generateGeneralControlPoints();
 	}
 
 	Actor(ModelView model){
 		//This is the joint that the actor is to start in world space
 		this->model = model;
 		path = new Trajectory();
+		path->generateGeneralControlPoints();
 	}
 
 	~Actor(){
 		//don't have to do anything to model, right?
 		delete path;
+	}
+
+	virtual Pose& update(){
+		return path->update();
 	}
 
 	/*
@@ -40,7 +45,7 @@ public:
 	*/
 
 	void setBasicPath(){
-		path = new Trajectory();
+		path->generateGeneralControlPoints();
 	}
 
 };

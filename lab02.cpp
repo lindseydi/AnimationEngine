@@ -1,7 +1,9 @@
 
 #pragma once
+
 #include <stdlib.h>
 #include "Pose.h"
+#include "Trajectory.h"
 // standard
 #include <assert.h>
 #include <math.h>
@@ -18,7 +20,6 @@
 #include "Renderer.h"
 #include "matrix3.h"
 #include "matrix4.h"
-//#include "Trajectory.h"
 #include "Scene.h"
 #include "Modelview.h"
 

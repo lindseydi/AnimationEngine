@@ -5,7 +5,6 @@
 #include "vertex3.h"
 #include "matrix4.h"
 #include "Trajectory.h"
-#include <math.h>
 //forward declaration
 class Link;
 

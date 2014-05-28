@@ -8,7 +8,6 @@ Joint::Joint(){
 	child = NULL;
 	parent = NULL;
 	angularVelocity = 0.00001f;
-	path = new Trajectory();
 }
 
 Joint::Joint(const PoseEuler& localPose){
@@ -20,7 +19,6 @@ Joint::Joint(const PoseEuler& localPose){
 	this->local_pose = localPose;
 	this->local_transformation = local_pose.getRotation() * local_pose.translate_object();
 	angularVelocity = 0.00001f;
-	path = new Trajectory();
 }
 
 void Joint::addLink(Link* child){
@@ -44,12 +42,8 @@ void Joint::rotate(){
 	//PoseEuler temp = PoseEuler(vertex3(), vertex3(0.0, 0.0, angle));
 //	local_transformation = local_transformation * ( temp.getRotation()* angularVelocity);
 	
-	Pose currentPose = path->update();
-	angle = (float) (std::atan2(currentPose.rotation.gety(), 0.0) - std::atan2(currentPose.rotation.getx(), 0.0));
-
-
 	//angle = angularVelocity * dt + angle0;
-	//angle += angularVelocity;
+	angle += angularVelocity;
 	std::cout << "theta:" << angle << std::endl;
 	Pose temp = Pose(vertex3(), quaternion(angle, 0.0, 0.0));
 	//Pose temp = Pose(vertex3(), quaternion(0.0, angle, 0.0));
@@ -62,9 +56,4 @@ void Joint::rotate(){
 	//		this->children.at(i)->child->rotate(rotate);
 	//	}
 	//}
-}
-
-void Joint::appendTrajectory(const PoseKey& pose){
-	PoseKey* temp = new PoseKey(pose);
-	path->controlPoints.push_back(temp);
 }

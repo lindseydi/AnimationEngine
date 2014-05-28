@@ -1,9 +1,7 @@
 
 #pragma once
-
 #include <stdlib.h>
 #include "Pose.h"
-#include "Trajectory.h"
 // standard
 #include <assert.h>
 #include <math.h>
@@ -20,6 +18,7 @@
 #include "Renderer.h"
 #include "matrix3.h"
 #include "matrix4.h"
+#include "Trajectory.h"
 #include "Scene.h"
 #include "Modelview.h"
 
@@ -92,10 +91,6 @@ void init(void) {
 	lowerHip.outboard_displacement = vertex3(0.0f, 0.7f, 0.0f);
 	lowerHip.angle = PI/2.0;
 	lowerHip.angularVelocity = 0.1;
-	lowerHip.appendTrajectory(PoseKey(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 30));
-	lowerHip.appendTrajectory(PoseKey(0.0f, 0.0f, 0.0f, PI/4.0f, 0.0f, 0.0, 60));
-	lowerHip.appendTrajectory(PoseKey(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 90));
-	lowerHip.appendTrajectory(PoseKey(0.0f, 0.0f, 0.0f, PI/4.0f, 0.0f, 0.0f, 120));
 	//lowerHip.rotational_frame = matrix4();
 	lowerHip.rotational_frame = matrix4( 0, 0, 1, 0,
                                         -1, 0, 0, 0,

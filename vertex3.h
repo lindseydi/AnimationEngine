@@ -4,6 +4,7 @@
 #pragma once
 #include <math.h> 
 #include <GL/glut.h>
+#include "matrix4.h"
 #include <GL/glu.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -102,6 +103,13 @@ public:
 	}
 		*/
 
+	bool isApprox(vertex3 compare){
+		if(this->vertex.isApprox(compare.vertex))
+			return true;
+		else 
+			return false;
+	}
+
 	vertex3 operator-(const vertex3& vec){
 		vertex3 retVal;
 		retVal.vertex = this->vertex - vec.vertex;
@@ -119,6 +127,12 @@ public:
 		float Y = vertex.y() * scalar;
 		float Z = vertex.z() * scalar;
 		return vertex3(X, Y, Z);
+	}
+
+	vertex3 operator/(float scalar){
+		vertex3 ret = vertex3();
+		ret.vertex = this->vertex/scalar;
+		return ret;
 	}
 
 	Vector3f toEigen(const vertex3 nonEigenVector){
@@ -145,6 +159,13 @@ public:
 		printf("----%f  %f  %f\n", this->getx(), this->gety(), this->getz());
 	}
 
+	float getMagnitude(){
+		float x = this->vertex.x();
+		float y = this->vertex.y();
+		float z = this->vertex.z();
+		return sqrt(x*x + y*y + z*z);
+	}
+
 	void normalize(void){
 		/*
 		float mag = sqrt(x*x + y*y + z*z);
@@ -158,21 +179,10 @@ public:
 		y = y/mag;
 		z = z/mag;
 		*/
+
 		vertex.normalize();
 	}
-/*
-	void* toMatrix(void){
-		matrix mat(4,1);
-		mat(0,0) = this->x;
-		mat(1,0) = this->y;
-		mat(2,0) = this->z;
-		mat(3,0) = 1.0;
 
-
-		return &mat;
-	}
-
-*/
 	public:
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };

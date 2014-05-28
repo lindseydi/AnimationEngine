@@ -57,6 +57,12 @@ public:
 		//Necessary?
 	}
 
+	void operator=(const ModelView& mesh){
+		vertices = mesh.vertices;
+		edges = mesh.edges;
+		normals = mesh.normals;
+	}
+
 	void loadBox(float length, float width, float height){
 		//create polygons and vertices
 		float halfLen = length/2;
@@ -79,6 +85,89 @@ public:
 		edges.push_back(polygon(6, 7, 4, 5, calcTriangleNorm(6, 7, 4)));
 		edges.push_back(polygon(6, 5, 1, 2, calcTriangleNorm(6, 5, 1)));
 		edges.push_back(polygon(6, 7, 3, 2, calcTriangleNorm(6, 7, 3)));
+	}
+
+	void loadSphere(const float radius, const unsigned int arcSegments, const int slices){
+		float dtheta = 2.0 * PI / (float) arcSegments;
+		float theta = 0.0f;
+		float dphi = (float) PI / (float) (slices + 1);
+		float phi = 0.0f;
+		float x, y, z;
+
+		//generate vertices
+		//north pole
+		vertices.push_back(vertex3(0.0f, radius, 0.0f));
+		//south pole
+		vertices.push_back(vertex3(0.0f, -radius, 0.0f));
+
+		//slice verts
+		for(unsigned int i=0; i< slices; i++){
+			theta = 0.0;
+			phi += dphi;
+			for(unsigned int i=0;  i < arcSegments; i++){
+				x = sin(phi) * cos(theta);
+				y = cos(phi);
+				z = sin(phi) * sin(theta);
+				theta += dtheta;
+				vertices.push_back(vertex3(x*radius, y* radius, z * radius));
+			}
+		}
+
+		//generate polygons
+		for( unsigned int slice = 0; slice < slices + 1; slice++ ) {
+	        for( unsigned int i = 0; i < arcSegments; i++ ) {
+				polygon p = polygon();
+				if(slice == 0){
+					//top cap - triads(?)
+					p.addVertex(0);
+					 if( i < arcSegments - 1 )
+					   p.addVertex( i + 2 );
+					 else
+					   p.addVertex( 1 );
+					p.addVertex( i + 1 );
+			   } else if( slice > 0 && slice < slices ) {
+					// Quads
+					p.addVertex( arcSegments * (slice - 1) + i + 1 );
+					if( i < arcSegments - 1 ) {
+						p.addVertex( arcSegments * (slice - 1) + i + 2 );
+						p.addVertex( arcSegments * (slice) + i + 2 );
+
+					} else {
+						p.addVertex( arcSegments * (slice - 1) + 1 );
+						p.addVertex( arcSegments * (slice) + 1 );
+					}
+					p.addVertex( arcSegments * (slice) + i + 1 );
+				} else if( slice == slices ) {
+					// Bottom Cap - Triads
+					p.addVertex( arcSegments * (slice - 1) + i + 1 );
+					if( i < arcSegments - 1 ) {
+						p.addVertex( arcSegments * (slice - 1) + i + 2 );
+					} else {
+						p.addVertex( arcSegments * (slice - 1) + 1 );
+					}
+					p.addVertex( this->vertices.size() - 1 );
+				}
+				p.setNormal(calcTriangleNorm(p));
+				p.flip();      // the sphere is wrong handed for OpenGL. Flip here solves for all polys
+				edges.push_back(p);
+			}
+		}
+	}
+
+	void loadPyramid(float base, float height){
+		float halfBase = base/2;
+		float halfHeight = height/2;
+		vertices.push_back(vertex3(0.0, halfHeight, 0.0));
+		vertices.push_back(vertex3(-halfBase, -halfHeight, -halfBase));
+		vertices.push_back(vertex3(halfBase, -halfHeight, -halfBase));
+		vertices.push_back(vertex3(halfBase, -halfHeight, halfBase));
+		vertices.push_back(vertex3(-halfBase, -halfHeight, halfBase));
+
+		edges.push_back(polygon(1, 2, 3, 4, calcTriangleNorm(1, 2, 3)));
+		edges.push_back(polygon(1, 2, 0, calcTriangleNorm(1, 2, 0)));
+		edges.push_back(polygon(2, 3, 0, calcTriangleNorm(2, 3, 0)));
+		edges.push_back(polygon(3, 4, 0, calcTriangleNorm(3, 4, 0)));
+		edges.push_back(polygon(4, 1, 0, calcTriangleNorm(4, 1, 0)));
 	}
 
 vertex3 calcTriangleNorm(vertex3 vec0, vertex3 vec1, vertex3 vec2)
@@ -161,7 +250,7 @@ vertex3 calcTriangleNorm(int a, int b, int c){
 
 			//Put this information into the global vector edges
 			//TODO learn about pointers
-			polygon poly = polygon(a, b, c);
+			polygon poly = polygon(a, b, c, calcTriangleNorm(a, b, c));
 			edges[i] = poly;	//interesting
 			normals.at(a) = normals.at(a) + poly.normal;	//replaces generatenormals function
 		}

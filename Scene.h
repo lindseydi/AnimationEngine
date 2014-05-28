@@ -11,16 +11,30 @@ class Scene{
 			int total_frames;
 	public:
 		vector<Actor*> actors;
+		Flock* flock;
 		//Camera* camera;
+		Link* hierarchy;
 		int frame;
+		vector<Model*> models;
 
 	Scene(){
 		//camera = new Camera();
 		frame = 0;
+		flock = NULL;
+		hierarchy = NULL;
 	}
 
 	~Scene(){
 		while(!actors.empty()) delete actors.back(), actors.pop_back();
+	}
+
+	void update(Link* current){
+		current->update();
+		/*
+		for(int i=0; i< current->children.size(); ++i){
+			update(current->children.at(i)->child);
+		}
+		*/
 	}
 
 };

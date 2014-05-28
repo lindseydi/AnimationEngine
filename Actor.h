@@ -17,7 +17,6 @@ public:
 		//use default constructor which should set it to 0,0,0
 		model = ModelView();
 		path = new Trajectory();
-		model.loadBox(1.0, 1.0, 1.0);	//delete later
 	}
 
 	Actor(ModelView model){
@@ -29,6 +28,10 @@ public:
 	~Actor(){
 		//don't have to do anything to model, right?
 		delete path;
+	}
+
+	virtual Pose& update(){
+		return path->update();
 	}
 
 	/*

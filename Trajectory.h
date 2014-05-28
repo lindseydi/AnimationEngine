@@ -66,7 +66,7 @@ class Trajectory{
 			//glPointSize( 4 );
 			//glBegin(GL_POINTS);
 			//glColor3f( 1, 0, 0 );
-			for(int i=0; i<controlPoints.size(); i++){
+			for(unsigned int i=0; i<controlPoints.size(); i++){
 				Renderer::draw(controlPoints.at(i)->position);
 			}
 		}
@@ -139,7 +139,7 @@ class Trajectory{
 				return false;
 		}
 		
-		Pose& update(){
+		virtual Pose& update(){
 			//If finished interpolating between current start and end Control Points
 			//Move onto next one.
 			//Also check that we have not reached the end of our list to avoid
@@ -235,7 +235,7 @@ class Trajectory{
 			//printf("K0 -- %d--- k1-- %d --k2  %d--- k3-- %d\n", k0, k1, k2, k3);
 			//Create G!
 			Eigen::MatrixXf G(4, 1);
-			for(int i=0; i<7; i++) {
+			for(unsigned int i=0; i<7; i++) {
 					// G
 					G(0, 0) = controlPoints.at(k0)[0][i];			//must add the [0] to dereference the pointer
 					G(1, 0) = controlPoints.at(k1)[0][i];
@@ -259,6 +259,8 @@ class Trajectory{
 				pointsAlongPath.push_back(&inbetween->position);
 			return *inbetween;
 		}
+	public:
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 
 #endif

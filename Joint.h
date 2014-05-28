@@ -1,39 +1,31 @@
+#ifndef _JOINT_H_
+#define _JOINT_H_
+
 #pragma once;
-#include "Node.h"
+#include "vertex3.h"
+#include "matrix4.h"
+//forward declaration
+class Link;
 
 class Joint{
 	public:
-		vector<Node*> children;
-		int numChildren;
+		vertex3 inboard_displacement;
+		vertex3 outboard_displacement;
+		Link* child;
+		Link* parent;
+		PoseEuler local_pose;
+		matrix4 local_transformation;
+		float angle;	//limits rotation to one degree of freedom
+		float angularVelocity;
+		matrix4 rotational_frame;
 
-		//assuming no position
-		//but rotation?
+	Joint();
+	Joint(const PoseEuler& localPose);
 
-	Joint(){
-		numChildren = 0;
-	}
-
-	void rotate(Vector3f rotation){
-		//cast to quaternion
-	}
-
-	void rotate(Quaternionf rotation){
-
-	}
-
-	void addNode(Node* newChild){
-		children.push_back(newChild);
-		int numChildren = children.size();
-	}
-
-	bool isNull(){
-		if(numChildren != children.size()){
-			numChildren = children.size();
-		}			
-		if(numChildren == 0)
-			return true;
-		else
-			return false;
-	}
+	void addLink(Link* child);
+	void translate(vertex3 movement);
+	void rotate();
 
 };
+
+#endif

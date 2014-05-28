@@ -2,7 +2,7 @@
 #define _Model_H_
 
 #include "ModelView.h"
-#include "matrix4.h";
+#include "matrix4.h"
 #include "Pose.h"
 
 class Model{
@@ -34,8 +34,6 @@ public:
 		ModelView mesh;
 		PoseEuler* pose;
 		matrix4 transform;
-
-	public:
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 };

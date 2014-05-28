@@ -32,7 +32,6 @@ void Link::update(){
 
 		Joint* child = this->children.at(i);
 		child_link = child->child;
-
 		matrix4 previousLinkTransform = transform;
 		matrix4 inboard = PoseEuler(child->inboard_displacement, vertex3()).translate_object();
 		//matrix4 inboard = PoseEuler(vertex3(), vertex3()).translate_object();

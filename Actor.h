@@ -17,12 +17,14 @@ public:
 		//use default constructor which should set it to 0,0,0
 		model = ModelView();
 		path = new Trajectory();
+		path->generateGeneralControlPoints();
 	}
 
 	Actor(ModelView model){
 		//This is the joint that the actor is to start in world space
 		this->model = model;
 		path = new Trajectory();
+		path->generateGeneralControlPoints();
 	}
 
 	~Actor(){
@@ -43,7 +45,7 @@ public:
 	*/
 
 	void setBasicPath(){
-		path = new Trajectory();
+		path->generateGeneralControlPoints();
 	}
 
 };

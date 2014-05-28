@@ -24,7 +24,7 @@ class Pose{
 			rotation.set(theta, phi, psi);
 		}
 
-			Pose(float x, float y, float z, float theta, float phi, float psi, float w){
+		Pose(float x, float y, float z, float theta, float phi, float psi, float w){
 			position.set(x, y, z);
 			rotation.set(theta, phi, psi, w);
 		}

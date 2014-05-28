@@ -1,7 +1,7 @@
 #ifndef _RENDERER_H_
 #define _RENDERER_H_
 
-
+#pragma once
 #include "ModelView.h"
 #include "Pose.h"
 #include "Link.h"
@@ -201,7 +201,7 @@ public:
 		draw(*temp);
 
 		if(!hierarchy->isNull()){
-			for(unsigned int i=0; i<hierarchy->children.size(); i++){
+			for(unsigned int i=0; i<hierarchy->children.size(); ++i){
 				Link* temp = hierarchy->children.at(i)->child;
 				draw(temp);
 			}

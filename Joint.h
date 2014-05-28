@@ -4,6 +4,8 @@
 #pragma once;
 #include "vertex3.h"
 #include "matrix4.h"
+#include "Trajectory.h"
+#include <math.h>
 //forward declaration
 class Link;
 
@@ -18,6 +20,7 @@ class Joint{
 		float angle;	//limits rotation to one degree of freedom
 		float angularVelocity;
 		matrix4 rotational_frame;
+		Trajectory* path;
 
 	Joint();
 	Joint(const PoseEuler& localPose);
@@ -25,7 +28,7 @@ class Joint{
 	void addLink(Link* child);
 	void translate(vertex3 movement);
 	void rotate();
-
+	void appendTrajectory(const PoseKey& pose);
 };
 
 #endif

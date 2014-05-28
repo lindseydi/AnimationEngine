@@ -1,7 +1,7 @@
-﻿Build started 5/28/2014 6:48:06 AM.
+﻿Build started 5/28/2014 7:14:57 AM.
      1>Project "C:\Users\Lindsey\Documents\Visual Studio 2012\Projects\hierarchy\SimpleGLUT.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /IE:\Eigen\ /IC:\boost_1_55_0\ /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _VC80_UPGRADE=0x0600 /D _MBCS /Gm /EHsc /RTC1 /MTd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo".\Debug/" /Fd".\Debug/vc110.pdb" /Gd /TP /analyze- /errorReport:prompt Joint.cpp Link.cpp Trajectory.cpp lab02.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /IE:\Eigen\ /IC:\boost_1_55_0\ /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _VC80_UPGRADE=0x0600 /D _MBCS /Gm /EHsc /RTC1 /MTd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo".\Debug/" /Fd".\Debug/vc110.pdb" /Gd /TP /analyze- /errorReport:prompt Joint.cpp Link.cpp Trajectory.cpp
          Trajectory.cpp
      1>c:\users\lindsey\documents\visual studio 2012\projects\hierarchy\polygon.h(78): warning C4018: '<' : signed/unsigned mismatch
      1>c:\users\lindsey\documents\visual studio 2012\projects\hierarchy\modelview.h(104): warning C4018: '<' : signed/unsigned mismatch
@@ -108,16 +108,8 @@
                  c:\users\lindsey\documents\visual studio 2012\projects\hierarchy\link.h(11) : see declaration of 'Joint'
      1>c:\users\lindsey\documents\visual studio 2012\projects\hierarchy\renderer.h(205): error C2227: left of '->child' must point to class/struct/union/generic type
          Generating Code...
-         Compiling...
-         lab02.cpp
-     1>c:\users\lindsey\documents\visual studio 2012\projects\hierarchy\polygon.h(78): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\lindsey\documents\visual studio 2012\projects\hierarchy\modelview.h(104): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\lindsey\documents\visual studio 2012\projects\hierarchy\modelview.h(117): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\lindsey\documents\visual studio 2012\projects\hierarchy\modelview.h(128): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\lindsey\documents\visual studio 2012\projects\hierarchy\flock.h(266): warning C4018: '<' : signed/unsigned mismatch
-         Generating Code...
      1>Done Building Project "C:\Users\Lindsey\Documents\Visual Studio 2012\Projects\hierarchy\SimpleGLUT.vcxproj" (Build target(s)) -- FAILED.
 
 Build FAILED.
 
-Time Elapsed 00:00:13.28
+Time Elapsed 00:00:08.87

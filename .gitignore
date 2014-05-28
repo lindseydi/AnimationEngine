@@ -1,5 +1,4 @@
 Hierarchy.opensdf
-*.opensdf
 #Visual Studio files
 *.[Oo]bj
 *.user
@@ -10,7 +9,7 @@ Hierarchy.opensdf
 *_i.c
 *_p.c
 *.ncb
-*.suo
+#*.suo
 *.tlb
 *.tlh
 *.bak
@@ -19,7 +18,7 @@ Hierarchy.opensdf
 *.log
 *.lib
 *.sbr
-*.sdf
+#*.sdf
 *.opensdf
 *.unsuccessfulbuild
 ipch/

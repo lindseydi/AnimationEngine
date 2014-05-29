@@ -45,7 +45,7 @@ public:
 			//TODO is this correct?
 			//supposed to check that angle is not obtuse(I.E when boid is looking forward there is a boid in it's path)
 			vertex3 distToPotential = allBoids.at(i)->pose.position - this->pose.position;
-			float angle = this->pose.orientation.dotProduct(distToPotential);
+			float angle = this->pose.orientation->dotProduct(distToPotential);
 		//	printf("Dot-- %f, me -- %f, %f, %f --dist %f, %f, %f\n", angle, pose.orientation.getx(), pose.orientation.gety(), pose.orientation.getz(), distToPotential.getx(), distToPotential.gety(), distToPotential.getz());
 			if(angle < 0){
 				//if(this->distance(allBoids.at(i)) < radius)	//this checks that it's not REALLY far away
@@ -55,7 +55,7 @@ public:
 		//printf("THis boid has %d neighbors\n", neighbors.size());
 	}
 
-	PoseEuler& computeNextLocation(){
+	Pose& computeNextLocation(){
 		int numNeighbors = neighbors.size();
 		vertex3 cohesion = computeCohesion();		//suggesion 0
 		vertex3 separation = computeSeparation();	//suggestion 1
@@ -86,7 +86,7 @@ public:
 
 		 //printf("Current (%f, %f, %f)-- Future (%f, %f, %f)\n\n", this->pose.position.getx(), this->pose.position.gety(), this->pose.position.getz(), futurePos.getx(), futurePos.gety(), futurePos.getz());
 		//return pose;
-		PoseEuler* next = new PoseEuler(futurePos, suggestions[suggestion]);
+		Pose* next = new Pose(futurePos, suggestions[suggestion]);
 		//printf("This boid has %d neighbors and is moving towards", numNeighbors);
 		//suggestions[suggestion].print();
 		return *next;
@@ -103,7 +103,7 @@ public:
 				perceivedCenter = perceivedCenter + futurePositions.at(i);
 			}
 			perceivedCenter = perceivedCenter / (float)neighbors.size();
-			vertex3 diff =  this->pose.orientation - perceivedCenter;
+			vertex3 diff =  this->pose.getEulerRepresentation() - perceivedCenter;
 			//diff.normalize();
 			//diff.print();
 			return diff;
@@ -169,10 +169,10 @@ public:
 		//ignore for now
 		vertex3 averageDirection = vertex3();
 		for(unsigned int i=0; i<neighbors.size(); i++){
-			averageDirection = averageDirection + neighbors.at(i)->pose.orientation;
+			averageDirection = averageDirection + neighbors.at(i)->pose.getEulerRepresentation();
 		}
 		averageDirection = averageDirection/ neighbors.size();
-		return averageDirection - this->pose.orientation;
+		return averageDirection - this->pose.getEulerRepresentation();
 	}
 
 	float distance(BoidActor* potentialneighbor){
@@ -183,7 +183,7 @@ public:
 		return std::sqrt(xx + yy + zz);
 	}
 
-	PoseEuler& getPose(){
+	Pose& getPose(){
 		return (this->pose);
 	}
 
@@ -191,13 +191,13 @@ public:
 		return this->model;
 	}
 
-	void setPose(PoseEuler& pose){
-		this->pose.set(pose);
+	void setPose(Pose& pose){
+		this->pose = pose;
 	}
 
 	protected:
 	vector<BoidActor*> neighbors;
-	PoseEuler pose;
+	Pose pose;
 	float base, height;
 	ModelView model;
 	vertex3 velocity;
@@ -213,6 +213,7 @@ public:
 
 #ifndef _Flock_H_
 #define _Flock_H_
+
 #include "Actor.h"
 
 class Flock: public Actor{
@@ -231,10 +232,10 @@ public:
 			boids.at(i)->computeNeighbors(boids, 0.5);
 		}
 		//plan
-		vector<PoseEuler*> computedFutures;
+		vector<Pose*> computedFutures;
 		for(unsigned int i=0; i<boids.size(); i++){
 			computedFutures.push_back(&boids.at(i)->computeNextLocation());
-			vertex3 direction = computedFutures.back()->orientation;
+			vertex3 direction = computedFutures.back()->getEulerRepresentation();
 			//computes the angle between direction and up vector
 			double theta = atan2(direction.gety(), direction.getx()) - atan2(1.0, 0.0);
 			//corrects  in order to have a "normalized" angle
@@ -244,7 +245,7 @@ public:
 			while(theta > PI){
 				theta -= 2* PI;
 			}
-			computedFutures.back()->orientation = vertex3(0.0, 0.0, (float)theta);
+			computedFutures.back()->orientation = new vertex3(0.0, 0.0, (float)theta);
 		}
 
 		//act
@@ -276,4 +277,4 @@ protected:
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 
-#endif
+#endif	//Flock

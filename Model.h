@@ -1,8 +1,10 @@
-#ifndef _Model_H_
-#define _Model_H_
+#ifndef _MODEL_H_
+#define _MODEL_H_
 
+
+#include <stdlib.h>
 #include "ModelView.h"
-#include "matrix4.h";
+#include "matrix4.h"
 #include "Pose.h"
 
 class Model{
@@ -13,13 +15,13 @@ public:
 		pose = NULL;
 	}
 
-	Model(PoseEuler* pose){
+	Model(Pose* pose){
 		mesh.loadBox(1.0, 1.0, 1.0);
 		this->pose = pose;
 		this->transform = this->pose->getRotation() * this->pose->translate_object();
 	}
 
-	Model(ModelView mesh, PoseEuler* pose){
+	Model(ModelView mesh, Pose* pose){
 		this->mesh = mesh;
 		this->pose = pose;
 		this->transform = this->pose->getRotation() * this->pose->translate_object();
@@ -30,14 +32,17 @@ public:
 		this->pose = modelCopy.pose;
 	}
 
+	vertex3 getEulerRepresentation(){
+		pose->getEulerRepresentation();
+	}
+
 	public:
 		ModelView mesh;
-		PoseEuler* pose;
+		Pose* pose;
 		matrix4 transform;
 
 	public:
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 };
-
 #endif //Model

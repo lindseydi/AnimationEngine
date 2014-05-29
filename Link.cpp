@@ -5,11 +5,11 @@ Link::Link(): Model(){
 	parent = NULL;
 }
 
-Link::Link(ModelView mesh, PoseEuler* pose): Model(mesh, pose){
+Link::Link(ModelView mesh, Pose* pose): Model(mesh, pose){
 	//do nothing
 }
 
-Link::Link(ModelView mesh, PoseEuler* pose, std::string name): Model(mesh, pose){
+Link::Link(ModelView mesh, Pose* pose, std::string name): Model(mesh, pose){
 	this->name = name;
 }
 
@@ -34,9 +34,9 @@ void Link::update(){
 		child_link = child->child;
 
 		matrix4 previousLinkTransform = transform;
-		matrix4 inboard = PoseEuler(child->inboard_displacement, vertex3()).translate_object();
+		matrix4 inboard = Pose(child->inboard_displacement, vertex3()).translate_object();
 		//matrix4 inboard = PoseEuler(vertex3(), vertex3()).translate_object();
-		matrix4 outboard = PoseEuler(child->outboard_displacement, vertex3()).translate_object();
+		matrix4 outboard = Pose(child->outboard_displacement, vertex3()).translate_object();
 		//matrix4 outboard = PoseEuler(vertex3(), vertex3()).translate_object();
 		//what does this mean in terms of rotation?
 		child->rotate();
@@ -57,3 +57,62 @@ bool Link::isNull(){
 	else
 		return false;
 }
+
+//------------------------------------------------------------------------------------//
+//----------------------------------Link Root---------------------------------------//
+
+LinkRoot::LinkRoot(): Link(){
+	path = new Trajectory(0);	//sets cycle to type circle	
+	//1 is pendulum
+	//2 is clamp
+	generatePath();
+}
+	
+
+LinkRoot::LinkRoot(ModelView mesh, Pose* pose): Link(mesh, pose){
+	path = new Trajectory(1);
+	generatePath();
+}
+
+LinkRoot::LinkRoot(ModelView mesh, Pose* pose, std::string name): Link(mesh, pose, name){
+	path = new Trajectory(1);
+	generatePath();
+}
+
+void LinkRoot::update(){
+	pose =  &path->update();
+	transform = pose->translate_object() * pose->getRotation();
+	__super::update();
+}
+
+//TODO make a better path for it to follow!
+void LinkRoot::generatePath(){
+	path->resetPath();
+	//attempts to create circular walk
+	path->controlPoints.push_back(new PoseKey(vertex3(0.0, 0.0, 1.0)*5.0, vertex3((PI/2.0)+PI/2.0, 0.0, PI/2.0), 0));
+	path->controlPoints.push_back(new PoseKey(vertex3(-sqrt(2.0)/2.0, 0.0, sqrt(2.0)/2.0) * 5.0, vertex3((3.0*PI/4.0)+PI/2.0, 0.0, PI/2.0), 120));
+	path->controlPoints.push_back(new PoseKey(vertex3(-1.0, 0.0, 0.0) * 5.0, vertex3((PI)+PI/2.0, 0.0, PI/2.0), 240));
+	path->controlPoints.push_back(new PoseKey(vertex3(-sqrt(2.0)/2.0, 0.0, -sqrt(2.0)/2.0) * 5.0, vertex3((5.0*PI/4.0)+PI/2.0, 0.0, PI/2.0), 360));
+	path->controlPoints.push_back(new PoseKey(vertex3(0.0, 0.0, -1.0) * 5.0, vertex3((3.0*PI/2.0)+PI/2.0, 0.0, PI/2.0), 480));
+	path->controlPoints.push_back(new PoseKey(vertex3((sqrt(2.0)/2.0), 0.0, (-sqrt(2.0)/2.0)) * 5.0, vertex3((7.0*PI/4.0)+PI/2.0, 0.0, PI/2.0), 600));
+	//path->controlPoints.push_back(new PoseKey(vertex3(1.0, 0.0, 0.0)* 5.0, vertex3(PI/2.0, 0.0, PI/2.0), 720));
+	//path->controlPoints.push_back(new PoseKey(vertex3(sqrt(2.0)/2.0, 0.0, sqrt(2.0)/2.0)* 5.0, vertex3((PI/4.0)+PI/2.0, 0.0, PI/2.0), 840));
+
+	/*
+	//-----------------------------------------------------------------------------------------------//
+	path->controlPoints.push_back(new PoseKey(0.0, 0.0, 1.0, 0.0, PI/2.0, PI/2.0, 0));
+	path->controlPoints.push_back(new PoseKey(-sqrt(2.0)/2.0, 0.0, sqrt(2.0)/2.0, 0.0, 3.0*PI/4.0,  PI/2.0, 120));
+	path->controlPoints.push_back(new PoseKey(-1.0, 0.0, 0.0, PI, 0.0, PI/2.0, 240));
+	path->controlPoints.push_back(new PoseKey(-sqrt(2.0)/2.0, 0.0, -sqrt(2.0)/2.0, 0.0, 5.0*PI/4.0,  PI/2.0, 360));
+	path->controlPoints.push_back(new PoseKey(0.0, 0.0, -1.0, 0.0, 3.0*PI/2.0, 3.0*PI/2.0, 480));
+	path->controlPoints.push_back(new PoseKey((sqrt(2.0)/2.0), 0.0, (-sqrt(2.0)/2.0),  0.0, 7.0*PI/4.0, PI/2.0, 600));
+	path->controlPoints.push_back(new PoseKey(1.0, 0.0, 0.0, 0.0, 0.0, PI/2.0, 720));
+	path->controlPoints.push_back(new PoseKey(sqrt(2.0)/2.0, 0.0, sqrt(2.0)/2.0, 0.0, PI/4.0, PI/2.0, 840));
+	*/
+	//path->controlPoints.push_back(new PoseKey(0.25, 0.0, 0.5, 0.0, 0.0, PI/2.0, 80));
+	//path->controlPoints.push_back(new PoseKey(0.5, 0.0, 1.0,  PI/2.0, 0.0, PI/2.0, 150));
+	//path->controlPoints.push_back(new PoseKey(0.7, 0.0, 0.6,  PI, 0.0, PI/2.0, 180));
+	path->init();
+}
+
+

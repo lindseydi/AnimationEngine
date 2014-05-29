@@ -224,6 +224,22 @@ quaternion& slerp(quaternion a, quaternion b, float u)
     }
 */
 
+vertex3 toEuler(){
+	
+	double X = this->getx();
+	double Y= this->gety();
+	double Z = this->getz();
+	double W = this->getw();
+	double test = X*Y + Z*W;
+	double sqx = X*X;
+    double sqy = Y*Y;
+    double sqz = Z*Z;
+    double heading = atan2(2*Y*W-2*X*Z , 1 - 2*sqy - 2*sqz);
+	double attitude = asin(2*test);
+	double bank = atan2(2*X*W-2*Y*Z , 1 - 2*sqx - 2*sqz);
+	return vertex3(heading, attitude, bank);
+}
+
 matrix4 getRotation(){
 	//TODO 
 	//test this!

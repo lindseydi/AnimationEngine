@@ -8,9 +8,10 @@ Joint::Joint(){
 	child = NULL;
 	parent = NULL;
 	angularVelocity = 0.00001f;
+	path = new Trajectory();
 }
 
-Joint::Joint(const PoseEuler& localPose){
+Joint::Joint(const Pose& localPose){
 	inboard_displacement = vertex3();
 	outboard_displacement = vertex3();
 	angle = 0.0f;
@@ -19,6 +20,7 @@ Joint::Joint(const PoseEuler& localPose){
 	this->local_pose = localPose;
 	this->local_transformation = local_pose.getRotation() * local_pose.translate_object();
 	angularVelocity = 0.00001f;
+	path = new Trajectory();
 }
 
 void Joint::addLink(Link* child){
@@ -42,9 +44,17 @@ void Joint::rotate(){
 	//PoseEuler temp = PoseEuler(vertex3(), vertex3(0.0, 0.0, angle));
 //	local_transformation = local_transformation * ( temp.getRotation()* angularVelocity);
 	
-	//angle = angularVelocity * dt + angle0;
-	angle += angularVelocity;
-	std::cout << "theta:" << angle << std::endl;
+	Pose currentPose = path->update();
+
+	float x, y;
+	x = currentPose.position.getx();
+	y = currentPose.position.gety();
+	angle = -PI/2.0 + (float) (std::atan2(y, x) - std::atan2(1.0, 0.0));
+
+
+	//REALLY MEANS: angle = angularVelocity * dt + angle0;
+	//angle += angularVelocity;
+	//std::cout << "x:" << x << ", y:" << y << ", theta:" << angle << std::endl;
 	Pose temp = Pose(vertex3(), quaternion(angle, 0.0, 0.0));
 	//Pose temp = Pose(vertex3(), quaternion(0.0, angle, 0.0));
 	local_transformation = temp.getRotation();
@@ -56,4 +66,9 @@ void Joint::rotate(){
 	//		this->children.at(i)->child->rotate(rotate);
 	//	}
 	//}
+}
+
+void Joint::addPointOnPath(PoseKey* controlPoint){
+	PoseKey* temp = controlPoint;
+	path->controlPoints.push_back(controlPoint);
 }

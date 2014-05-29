@@ -165,6 +165,7 @@
     <ClInclude Include="quaternion.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="RigidBody.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="StdAfx.h" />
     <ClInclude Include="Trajectory.h" />

@@ -57,6 +57,12 @@ public:
 		//Necessary?
 	}
 
+	void clear(){
+		this->vertices.clear();
+		this->edges.clear();
+		this->normals.clear();
+	}
+
 	void operator=(const ModelView& mesh){
 		vertices = mesh.vertices;
 		edges = mesh.edges;
@@ -64,6 +70,7 @@ public:
 	}
 
 	void loadBox(float length, float width, float height){
+		clear();
 		//create polygons and vertices
 		float halfLen = length/2;
 		float halfWidth = width/2;
@@ -88,6 +95,7 @@ public:
 	}
 
 	void loadSphere(const float radius, const unsigned int arcSegments, const int slices){
+		clear();
 		float dtheta = 2.0 * PI / (float) arcSegments;
 		float theta = 0.0f;
 		float dphi = (float) PI / (float) (slices + 1);
@@ -155,6 +163,7 @@ public:
 	}
 
 	void loadPyramid(float base, float height){
+		clear();
 		float halfBase = base/2;
 		float halfHeight = height/2;
 		vertices.push_back(vertex3(0.0, halfHeight, 0.0));
@@ -203,6 +212,7 @@ vertex3 calcTriangleNorm(int a, int b, int c){
 
 	void read_file(string filename)
 {
+	clear();
 	int vert_count;
 	int i;
 	ifstream inFile;  

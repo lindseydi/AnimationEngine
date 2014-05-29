@@ -1,4 +1,4 @@
-
+/*
 #pragma once
 #include <stdlib.h>
 #include "Pose.h"
@@ -42,8 +42,9 @@ int g_frameIndex = 0;
 Scene scene;
 ModelView box;
 ModelView sphere;
-Joint upperHip, lowerHip, knee, ankle;
-Link pelvis, thigh, calf, foot;
+Joint rightHip, leftHip;
+LinkRoot pelvis;
+Link rightLeg, leftLeg;
 
 double u;
 GLfloat PofU[7];
@@ -71,38 +72,66 @@ void init(void) {
 	
 	ModelView pelvisModel = ModelView();
 	pelvisModel.loadBox(0.2, 1.2, 0.2);
-	pelvis = Link(pelvisModel, new PoseEuler(0.0, 0.0, 0.0, 0.0, 0.0, PI/2), "pelvis");
+	pelvis = LinkRoot(pelvisModel, new Pose(0.0, 0.0, 0.0, 0.0, 0.0, 0.0), "pelvis");
+	//pelvis = Link(pelvisModel, new PoseEuler(0.0, 0.0, 0.0, 0.0, 0.0, 0.0), "pelvis");
 
-	ModelView thighModel = ModelView();
-	thighModel.loadBox(0.2, 1.2, 0.2);
-	thigh = Link(thighModel, new PoseEuler(0.0, 0.0, 0.0, 0.0, 0.0, 0.0), "thigh");
+	ModelView legModel = ModelView();
+	legModel.loadBox(0.2, 1.2, 0.2);
+	rightLeg = Link(legModel, new Pose(0.0, 0.0, 0.0, 0.0, 0.0, 0.0), "rightLeg");
+
+	leftLeg = Link(legModel, new Pose(0.0, 0.0, 0.0, 0.0, 0.0, 0.0), "leftLeg");
+
 
 	ModelView calfModel = ModelView();
 	calfModel.loadBox(0.1, 0.1, 0.3);
-	calf = Link(calfModel, new PoseEuler(0.0, 0.0, 0.0, 0.0, 0.0, -20.0), "calf");
+	Link calf = Link(calfModel, new Pose(0.0, 0.0, 0.0, 0.0, 0.0, -20.0), "calf");
 
 	
 	ModelView footModel = ModelView();
 	footModel.loadBox(0.1, 0.2, 0.1);
-	foot = Link(footModel, new PoseEuler(0.0, 0.0, 0.0, 0.0, 0.0, 90.0), "foot");
+	Link foot = Link(footModel, new Pose(0.0, 0.0, 0.0, 0.0, 0.0, 90.0), "foot");
 
-	lowerHip = Joint(PoseEuler());
-	lowerHip.inboard_displacement = vertex3(0.0f, -0.7f, 0.0f);
-	lowerHip.outboard_displacement = vertex3(0.0f, 0.7f, 0.0f);
-	lowerHip.angle = PI/2.0;
-	lowerHip.angularVelocity = 0.1;
-	//lowerHip.rotational_frame = matrix4();
-	lowerHip.rotational_frame = matrix4( 0, 0, 1, 0,
+	leftHip = Joint(Pose());
+	leftHip.inboard_displacement = vertex3(0.0f, -0.7f, 0.0f);
+	leftHip.outboard_displacement = vertex3(0.0f, 0.7f, 0.0f);
+	leftHip.angle =PI/2.0;
+	leftHip.angularVelocity = 0.1;
+	leftHip.path->resetPath();
+	leftHip.addPointOnPath(new PoseKey(-sqrt(2.0)/2.0, sqrt(2.0)/2.0, 0.0f, 0.0f, 0.0f, 0.0, 0));
+	leftHip.addPointOnPath(new PoseKey(-1.0/2.0, sqrt(3.0)/2.0, 0.0f, 0.0f, 0.0f, 0.0, 45));
+	leftHip.addPointOnPath(new PoseKey(0, 1.0, 0.0f, 0.0f, 0.0f, 0.0f, 90));
+	leftHip.addPointOnPath(new PoseKey(1.0/2.0, sqrt(3.0)/2.0, 0.0f, 0.0f, 0.0f, 0.0, 135));
+	leftHip.addPointOnPath(new PoseKey(sqrt(2.0)/2.0, sqrt(2.0)/2.0, 0.0f, 0.0f, 0.0f, 0.0f, 180));
+	leftHip.rotational_frame = matrix4( 0, 0, 1, 0,
                                         -1, 0, 0, 0,
                                          0, 1, 0, 0,
                                          0, 0, 0, 1 );
-	knee = Joint();
-	ankle = Joint();
+	rightHip = Joint(Pose());
+	rightHip.inboard_displacement = vertex3(0.0f, 0.7f, 0.0f);
+	rightHip.outboard_displacement = vertex3(0.0f, -0.7f, 0.0f);
+	rightHip.angle = PI/2.0;
+	rightHip.angularVelocity = 0.1;
+	rightHip.path->resetPath();
+	rightHip.addPointOnPath(new PoseKey(-sqrt(2.0)/2.0, -sqrt(2.0)/2.0, 0.0f, 0.0f, 0.0f, 0.0, 0));
+	rightHip.addPointOnPath(new PoseKey(-1.0/2.0, -sqrt(3.0)/2.0, 0.0f, 0.0f, 0.0f, 0.0, 45));
+	rightHip.addPointOnPath(new PoseKey(0, -1.0, 0.0f, 0.0f, 0.0f, 0.0f, 90));
+	rightHip.addPointOnPath(new PoseKey(1.0/2.0, -sqrt(3.0)/2.0, 0.0f, 0.0f, 0.0f, 0.0, 135));
+	rightHip.addPointOnPath(new PoseKey(sqrt(2.0)/2.0, -sqrt(2.0)/2.0, 0.0f, 0.0f, 0.0f, 0.0f, 180));
+	rightHip.rotational_frame = matrix4( 0, 0, 1, 0,
+                                         -1, 0, 0, 0,
+                                         0, 1, 0, 0,
+                                         0, 0, 0, 1 );
+
+	//knee = Joint(PoseEuler());
+	//knee.inboard_displacement = vertex3()
+	//ankle = Joint();
 
 	//link the joints and links
-	pelvis.addChild(&lowerHip);
-	lowerHip.addLink(&thigh);
-	//thigh.addChild(&knee);
+	pelvis.addChild(&leftHip);
+	pelvis.addChild(&rightHip);
+	leftHip.addLink(&rightLeg);
+	rightHip.addLink(&leftLeg);
+	//rightLeg.addChild(&knee);
 	//knee.addLink(&calf);
 	//calf.addChild(&ankle);
 	//ankle.addLink(&foot);
@@ -112,7 +141,7 @@ void init(void) {
 
 	//scene.model = new Model(footModel, new PoseEuler(0.0, 0.0, 0.0, 0.0, 0.0, 90.0));
 	//scene.models.push_back(new Link(pelvisModel, new PoseEuler(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)));
-	//scene.models.push_back(new Link(thighModel, new PoseEuler(0.0, -1.4, 0.0, 0.0, 0.0, 0.0)));
+	//scene.models.push_back(new Link(rightLegModel, new PoseEuler(0.0, -1.4, 0.0, 0.0, 0.0, 0.0)));
 
 }
 
@@ -178,8 +207,8 @@ void render( void ){
 		Renderer::draw(&scene);
 
 		//pelvis.transform.identity();
-		//thigh.transform.identity();
-		//lowerHip.local_transformation.identity();
+		//rightLeg.transform.identity();
+		//leftHip.local_transformation.identity();
 
 		//for now draw box!
 		//Renderer::draw(new Pose(0.0, 0.0, -100.0, 15.0, 30.0, 0.0), &box);
@@ -214,7 +243,10 @@ void reshape( int w, int h ) {
 	gluPerspective(45.0, (GLfloat)w/(GLfloat)h, 0.1, 1000.0);
 	//glTranslatef(0.0, 0.0, -10.0);
 
-	gluLookAt(0.0, 0.0, -10.0, 0.0, 0.0, -9.0, 0.0, 1.0, 0.0);
+//	gluLookAt(0.0, 0.0, -10.0, 0.0, 0.0, -9.0, 0.0, 1.0, 0.0);
+	//when rotating around y, must change x and z values
+	//gluLookAt(10.0, 0.0, 0.0, 9.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+	gluLookAt(10.0, 3.0, -10.0, 4.0, 0.0, -4.0, 0.0, 1.0, 0.0);
 
 
 	glMatrixMode(GL_MODELVIEW);
@@ -273,3 +305,5 @@ int main( int argc, char** argv ) {
 
 	return 0;
 }
+
+*/

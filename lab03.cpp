@@ -1,5 +1,3 @@
-/*
-
 #pragma once
 #include <stdlib.h>
 #include "Pose.h"
@@ -22,6 +20,7 @@
 #include "Trajectory.h"
 #include "Scene.h"
 #include "Modelview.h"
+#include "RigidBody.h"
 
 #include <iostream>
 #include <vector>
@@ -45,6 +44,7 @@ ModelView box;
 
 double u;
 GLfloat PofU[7];
+RigidBody sphere;
 
 //================================
 // init
@@ -60,7 +60,9 @@ void init(void) {
 	scene = new Scene();
 	//Actor* actor = new Actor(ModelView("resources/knight.txt"));
 	Actor* actor = new Actor(box);
-	scene->actors.push_back(actor);
+	//scene->actors.push_back(actor);
+
+	sphere = RigidBody();
 }
 
 Trajectory& createKeyFrames(void){
@@ -274,5 +276,3 @@ int main( int argc, char** argv ){
 
 	return 0;
 }
-
-*/

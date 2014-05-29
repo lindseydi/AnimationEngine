@@ -6,40 +6,52 @@
 #include <stdlib.h>
 #include "vertex3.h"
 #include "quaternion.h"
-#include <time.h>
 
 class Pose{
 	public:
 		vertex3 position;
-		quaternion rotation;
+		vertex3* orientation;		//EULER ANGLE
+		quaternion rotation_quat;	//QUATERNION		
 
 		Pose(){
 			//Default constructor
 			position.zero();
-			rotation.set(0.0, 0.0, 0.0);
+			orientation = NULL;
+			rotation_quat.set(0.0, 0.0, 0.0);
 		}
 
 		Pose(float x, float y, float z, float theta, float phi, float psi){
 			position.set(x, y, z);
-			rotation.set(theta, phi, psi);
+			orientation = new vertex3(theta, phi, psi);
+			rotation_quat.set(theta, phi, psi);
 		}
 
-			Pose(float x, float y, float z, float theta, float phi, float psi, float w){
+		Pose(float x, float y, float z, float theta, float phi, float psi, float w){
 			position.set(x, y, z);
-			rotation.set(theta, phi, psi, w);
+			orientation = NULL;
+			rotation_quat.set(theta, phi, psi, w);
 		}
 
 		Pose(const vertex3& pos, const quaternion& rot){
 			position = pos;
-			rotation = rot;
+			orientation = NULL;
+			rotation_quat = rot;
+		}
+
+		Pose(const Pose& pose){
+			this->position = pose.position;
+			this->orientation = pose.orientation;
+			this->rotation_quat = pose.rotation_quat;
 		}
 
 		virtual void set(float x, float y, float z, float theta, float phi, float psi){
 			position.set(x, y, z);
-			rotation.set(theta, phi, psi);
+			orientation = new vertex3(theta, phi, psi);
+			rotation_quat.set(theta, phi, psi);
 		}
 
 		//Will return an array of seven elements
+		//returns quaternion data, since it is ALWAYS valid.
 		float& operator[](unsigned int index)
 		{
 			switch(index){
@@ -53,16 +65,16 @@ class Pose{
 					return this->position.vertex.z();
 				break;
 				case 3:
-					return this->rotation.quat.x();
+					return this->rotation_quat.quat.x();
 				break;
 				case 4:
-					return this->rotation.quat.y();
+					return this->rotation_quat.quat.y();
 				break;
 				case 5:
-					return this->rotation.quat.z();
+					return this->rotation_quat.quat.z();
 				break;
 				case 6:
-					return this->rotation.quat.w();
+					return this->rotation_quat.quat.w();
 				break;
 				default:
 					printf("Something is wrong inside Pose[]\n");
@@ -105,10 +117,10 @@ class Pose{
 	
 	virtual matrix4 getRotation(){
 		matrix4 rot = matrix4();
-		float X = this->rotation.getx();
-		float Y = this->rotation.gety();
-		float Z = this->rotation.getz();
-		float W = this->rotation.getw();
+		float X = this->rotation_quat.getx();
+		float Y = this->rotation_quat.gety();
+		float Z = this->rotation_quat.getz();
+		float W = this->rotation_quat.getw();
 		rot(0,0) = 1-2*Y*Y -2*Z*Z;
 		rot(0,1) = 2*X*Y - 2*W*Z;
 		rot(0,2) = 2*X*Z + 2*W*Y;
@@ -126,68 +138,11 @@ class Pose{
 		return rot;
 	}
 
-	void print(){
-		printf("%f, %f, %f ---- \n", position.getx(), position.gety(), position.getz());
-	}
-
-	
-	public:
-	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
-};
-
-class PoseKey: public Pose {
-	public:
-		int frame;	//always necessary? 
-
-		PoseKey():Pose(){
-			//Default constructor
-			frame = 0;
-		}
-
-		PoseKey(const vertex3& pos, const quaternion& rot, int frame) : Pose(pos, rot){
-			this->frame = frame;
-		}
-
-		PoseKey(float x, float y, float z, float theta, float phi, float psi, int frame): Pose(x, y, z, theta, phi, psi){
-			this->frame = frame;
-
-		}
-
-		void set(float x, float y, float z, float theta, float phi, float psi, int frame){
-			position.set(x, y, z);
-			rotation.set(theta, phi, psi);
-			this->frame = frame;
-		}
-
-		
-	public:
-	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
-};
-
-class PoseEuler: public Pose{
-public:
-	vertex3 orientation;
-	PoseEuler(): Pose(){
-		orientation = vertex3(0.0, 0.0, 0.0);
-	}
-
-	PoseEuler(float x, float y, float z, float theta, float phi, float psi){
-			position.set(x, y, z);
-			orientation = vertex3(theta, phi, psi);
-	}
-
-	PoseEuler(vertex3 pos, vertex3 orientation){
-			position.set(pos);
-			this->orientation = orientation;
-	}
-
-	virtual matrix4 getRotation(){
+	virtual matrix4 getEulerRotation(){
 		float pitch, yaw, roll;
-		pitch = orientation.getx();
-		yaw = orientation.gety();
-		roll = orientation.getz();
+		pitch = orientation->getx();
+		yaw = orientation->gety();
+		roll = orientation->getz();
 		matrix4 rotatePitch;
 		matrix4 rotateYaw;
 		matrix4 rotateRoll;
@@ -215,25 +170,85 @@ public:
 		rotateRoll(3, 3) = 1.0;
 
 		product = rotatePitch * rotateYaw * rotateRoll;
-	return product;
-	//float m[16];
-	//product.transpose().ToArray(m);
-	//glMultMatrixf(m);
-}
-	void operator=(const PoseEuler& copy){
-		this->position = copy.position;
-		this->orientation = copy.orientation;
+		return product;
+		//float m[16];
+		//product.transpose().ToArray(m);
+		//glMultMatrixf(m);
 	}
 
-	virtual void set(const PoseEuler& posein){
-		this->position.set(posein.position);
-		this->orientation.set(posein.orientation);
+	void print(){
+		printf("%f, %f, %f ---- \n", position.getx(), position.gety(), position.getz());
 	}
 
-public:
+	/*
+	PoseEuler toEulerPose(Pose& input){
+		//be sure to test "toEuler method"
+		return PoseEuler(input.position, input.rotation_quat.toEuler());
+	}
+	*/
+	bool orientationValid(){
+		if(orientation != NULL)
+				return true;
+			else
+				return false;
+	}
+
+	vertex3 getEulerRepresentation(){
+		if(orientationValid())
+			return *(this->orientation);
+		else{
+			vertex3 retVal = vertex3();
+			retVal = rotation_quat.toEuler();
+			return retVal;
+		}
+	}
+	
+	public:
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 };
 
-#endif
+#endif	//Pose
+
+#ifndef _POSEKEY_H_
+#define _POSEKEY_H_
+
+class PoseKey: public Pose {
+	public:
+		int frame;	//always necessary? 
+
+		PoseKey():Pose(){
+			//Default constructor
+			frame = 0;
+		}
+
+		PoseKey(const vertex3& pos, const quaternion& rot, int frame) : Pose(pos, rot){
+			this->frame = frame;
+		}
+
+		PoseKey(float x, float y, float z, float theta, float phi, float psi, int frame): Pose(x, y, z, theta, phi, psi){
+			this->frame = frame;
+		}
+
+		PoseKey(const PoseKey& posekey){
+			this->frame = posekey.frame;
+			this->rotation_quat = posekey.rotation_quat;
+			this->orientation = posekey.orientation;
+			this->position = posekey.position;
+		}
+
+		void set(float x, float y, float z, float theta, float phi, float psi, int frame){
+			position.set(x, y, z);
+			rotation_quat.set(theta, phi, psi);
+			orientation->set(theta, phi, psi);
+			this->frame = frame;
+		}
+
+		
+	public:
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+};
+
+#endif	//PoseKey
 

@@ -6,12 +6,13 @@
 #include <stdlib.h>
 #include <vector>
 #include "Pose.h"
-#include "Renderer.h"
+//#include "Renderer.h"
 #include "matrix4.h"
 #include "Vector4.h"
 #include <Eigen/Geometry>
 
 class Trajectory{
+	public:
 	enum cubicSpline{catmullRom, bSpline};
 	enum Cycle{circle, pendulum, clamp};
 	
@@ -25,33 +26,7 @@ class Trajectory{
 		bool end;			//Used for clamped splines
 		float PofU[7];
 
-		void init(){
-			u = 0;	//local frame
-			cpIndex = 1;
-			//curFrame = globalFrame?
-			forward = true;
-			end = false;
-			M = Eigen::MatrixXf(4, 4);
-			endFrame = controlPoints.at(1)->frame;
-			startFrame = controlPoints.at(0)->frame;
-			setSplineType();
-		}
-
 		void generateControlPoints(){
-			
-			/*
-			controlPoints.push_back(new PoseKey(-1.0,	0.0,	0.0,	90.0,	0.0,	0.0,	 0));
-			controlPoints.push_back(new PoseKey(-1.5,	0.70,	0.0,	65.0,	0.0,	-20.0,	30));
-			controlPoints.push_back(new PoseKey(-0.7,	0.5,	0.0,	85.0,	0.0,	0.0,	60));
-			controlPoints.push_back(new PoseKey(0.0,	1.0,	0.0,	30.0,	0.0,	0.0,	90));
-			controlPoints.push_back(new PoseKey(0.25,	0.5,	0.0,	85.0,	0.0,	0.0,	120));
-			controlPoints.push_back(new PoseKey(0.5,	0.0,	0.0,	65.0,	90.0,	0.0,	150));
-			controlPoints.push_back(new PoseKey(0.75,	-0.5,	0.0,	30.0,	0.0,	0.0,	180));
-			controlPoints.push_back(new PoseKey(0.25,	1.5,	0.0,	85.0,	0.0,	0.0,	210));
-			controlPoints.push_back(new PoseKey(0.0,	0.5,	0.0,	85.0,	0.0,	20.0,	240));
-			controlPoints.push_back(new PoseKey(-1.25, -0.5,	0.0,	-35.0,	0.0,	0.0,	270));
-			*/
-
 			controlPoints.push_back(new PoseKey(-1.5,	0.0,	0.0,	0.0,	10.0,	0.0,	 0));
 			controlPoints.push_back(new PoseKey(-1.0,	0.0,	0.0,	0.0,	0.0,	0.0,	30));
 			controlPoints.push_back(new PoseKey(-0.5,	0.0,	-2.5,	0.0,	0.0,	0.0,	60));
@@ -61,16 +36,11 @@ class Trajectory{
 			controlPoints.push_back(new PoseKey(1.5,	0.0,	2.0,	0.0,	0.0,	0.0,	180));
 
 		}
-		/*
-		void drawKeys(void){
-			//glPointSize( 4 );
-			//glBegin(GL_POINTS);
-			//glColor3f( 1, 0, 0 );
-			for(unsigned int i=0; i<controlPoints.size(); i++){
-				Renderer::draw(controlPoints.at(i)->position);
-			}
+
+		void resetPath(vector<PoseKey*> newControlPoints){
+			controlPoints.clear();
+			controlPoints = newControlPoints;
 		}
-		*/
 
 		void setSplineType(){
 			M.resize(4,4);
@@ -105,6 +75,18 @@ class Trajectory{
 		Cycle cycleType;
 		vector<vertex3*> pointsAlongPath;
 
+		void init(){
+			u = 0;	//local frame
+			cpIndex = 1;
+			//curFrame = globalFrame?
+			forward = true;
+			end = false;
+			M = Eigen::MatrixXf(4, 4);
+			endFrame = controlPoints.at(1)->frame;
+			startFrame = controlPoints.at(0)->frame;
+			setSplineType();
+		}
+
 		Trajectory(){
 			generateControlPoints();
 			splineType = catmullRom;
@@ -124,6 +106,13 @@ class Trajectory{
 			generateControlPoints();
 			splineType = spline;
 			cycleType = pendulum;
+			init();
+		}
+
+		Trajectory(int cycleType){
+			this->cycleType = (Cycle)cycleType;
+			generateControlPoints();
+			splineType = catmullRom;
 			init();
 		}
 
@@ -151,7 +140,6 @@ class Trajectory{
 			int k0, k1, k2, k3;
 			k0 = k1 = k2 = k3 = 0;
 			//implies forward because u is >
-			//printf("CpIndex = %d ----- u = %d ----- startFrame = %d -------- endFrame = %d \n", cpIndex, u, startFrame, endFrame);
 			if(cycleType!= circle && (u >= endFrame) && forward && cpIndex < (controlPoints.size() - 1)){
 				startFrame = endFrame;
 				cpIndex++;
@@ -173,6 +161,7 @@ class Trajectory{
 			//circle, pendulum, clamp
 			switch(cycleType){
 				case circle:{
+					printf("CpIndex = %d ----- u = %d ----- startFrame = %d -------- endFrame = %d \n", cpIndex, u, startFrame, endFrame);
 					//Must use brackets because we define a variable for scope reasons
 					int size = controlPoints.size()-1;
 					cpIndex = cpIndex % size;
@@ -248,7 +237,7 @@ class Trajectory{
 					Eigen::MatrixXf interpolation = T*M*G;				//multipying vectors and matrices
 					PofU[i] = (float)interpolation(0,0);			//what do we do with this?
 
-			//		printf("---%d %f %f\n", i, PofU[i], interpolation(0,0));
+			//	printf("---%d %f %f\n", i, PofU[i], interpolation(0,0));
 			//		cout << "The matrix T is:\n" << endl << T << endl;
 			//		cout << "The matrix M is:\n" << endl << M << endl;
 			//		cout << "The matrix G is:\n" << endl << G << endl;
@@ -259,8 +248,14 @@ class Trajectory{
 				pointsAlongPath.push_back(&inbetween->position);
 			return *inbetween;
 		}
+
+		void resetPath(){
+			controlPoints.clear();
+		}
+		
+
 	public:
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 
-#endif
+#endif //Trajectory

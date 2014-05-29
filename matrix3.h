@@ -14,8 +14,8 @@ public:
 	Matrix3f matrix;
 	//Constructors
 	void zero(){
-		for(unsigned int i=0; i<3; i++){
-			for(unsigned int j=0; j<3; j++){
+		for(unsigned int i=0; i<3; ++i){
+			for(unsigned int j=0; j<3; ++j){
 				this->matrix(i, j) = 0.0f;
 			}
 		}
@@ -29,6 +29,11 @@ public:
 	matrix3(const matrix3& mat){
 		matrix = Matrix3f(mat.matrix);
 	}
+
+	void identity(){
+		matrix = this->matrix.Identity();
+	}
+
 	//Operators
 	float operator()(int x, int y){
 		//allows access to a certain row/col of the matrix
@@ -58,13 +63,17 @@ public:
 		return retVal;
 	}
 
-	//other funcs
-	matrix3 transpose(){
-		matrix.transpose();
+	matrix3 inverse(){
+		matrix3 retVal;
+		retVal.matrix = matrix.inverse();
+		return retVal;
 	}
 
-	void identity(){
-		this->matrix.Identity();
+	//other funcs
+	matrix3 transpose(){
+		matrix3 retVal;
+		retVal.matrix = matrix.transpose();
+		return retVal;
 	}
 
 	void print(){

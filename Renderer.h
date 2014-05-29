@@ -34,6 +34,15 @@ public:
 		glEnd();
 	}
 
+	static void draw(vertex3 vector_0, vertex3 vector_1){
+		glPointSize( 4 );
+		glBegin(GL_LINES);
+			glColor3f( 1, 0, 0 );	//RED
+			glVertex3f((GLfloat)vector_0.getx(), (GLfloat)vector_0.gety(), (GLfloat)vector_0.gety());
+			glVertex3f((GLfloat)vector_1.getx(), (GLfloat)vector_1.gety(), (GLfloat)vector_1.gety());
+		glEnd();
+	}
+
 	static void draw(Trajectory* path){
 		vector<vertex3*>::iterator it;
 
@@ -116,7 +125,7 @@ public:
 			transform =	pose->translate_object();
 
 			//rotate
-			pose->rotation.normalize();
+			pose->rotation_quat.normalize();
 			transform = transform * pose->getRotation();
 			//transform = pose->getRotation();
 			//cout << "The matrix transform is:" << endl << transform.matrix << endl;
@@ -127,45 +136,10 @@ public:
 		glPopMatrix();		
 	}
 
-	static void draw(PoseEuler* pose, ModelView* model){
-		glPushMatrix();
-			matrix4 transform;
-			//translate
-			transform =	pose->translate_object();
-
-			//pose->orientation.normalize();
-			pose->orientation.print();
-			transform = transform * pose->getRotation();
-			//cout << "The matrix transform is:" << endl << transform.matrix << endl;
-
-			applyTransformation(transform);		
-			//glutSolidTeapot(0.3);
-			draw(*model);
-		glPopMatrix();	
-	}
-
 	static void draw(Pose* pose){
 		glPushMatrix();
 			matrix4 transform;
-			//translate
-			//transform =	pose->translate_object();
-
-			//rotate
-			pose->rotation.normalize();
-			transform = transform * pose->getRotation();
-			transform = pose->getRotation();
-			//cout << "The matrix transform is:" << endl << transform.matrix << endl;
-
-			applyTransformation(transform);		
-			draw(vertex3());
-		glPopMatrix();		
-	}
-
-	
-	static void draw(PoseEuler* pose){
-		glPushMatrix();
-			matrix4 transform;
-			pose->rotation.normalize();
+			pose->rotation_quat.normalize();
 			transform = pose->getRotation();
 			//cout << "The matrix transform is:" << endl << transform.matrix << endl;
 
@@ -175,7 +149,11 @@ public:
 	}
 
 	static void draw(Scene* scene){
-		
+		//create a frame of reference
+		draw(vertex3(), vertex3(2.0f, 0.0f, 0.0f));
+		draw(vertex3(), vertex3(0.0f, 2.0f, 0.0f));
+		draw(vertex3(), vertex3(0.0f, 0.0f, 2.0f));
+
 		for(unsigned int i=0; i<scene->actors.size(); i++){
 			draw(scene->actors.at(i));
 		}
@@ -183,14 +161,34 @@ public:
 			draw(scene->flock);
 		}
 		if(scene->hierarchy != NULL){
-			printf("Hierarchy attempting to draw\n");
-			matrix4 identity = matrix4();
-			identity.identity();
+			//printf("Hierarchy attempting to draw\n");
 			draw(scene->hierarchy);
+		}
+	}
+
+	static void draw(LinkRoot* hierarchy){
+		//move the root with it's trajectory
+		hierarchy->update();
+		draw(hierarchy->path);
+		
+		//matrix4 local_transform(transform);
+		//local_transform = local_transform * hierarchy->local_pose.translate_object();
+
+		//local_transform = local_transform * hierarchy->local_pose.getRotation();
+		//cout << "The matrix transform is:" << endl << transform.matrix << endl;
+		Model* temp = (Model*)hierarchy;
+		draw(*temp);
+
+		if(!hierarchy->isNull()){
+			for(unsigned int i=0; i<hierarchy->children.size(); i++){
+				Link* temp = hierarchy->children.at(i)->child;
+				draw(temp);
+			}
 		}
 	}
 	
 	static void draw(Link* hierarchy){
+
 
 		//matrix4 local_transform(transform);
 		//local_transform = local_transform * hierarchy->local_pose.translate_object();

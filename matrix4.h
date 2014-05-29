@@ -167,6 +167,11 @@ public:
 
 };
 
+#endif
+
+#ifndef _MATRIX1X4_H_
+#define _MATRIX1x4_H_
+
 class matrix1x4 {
 	public:
 		RowVector4f matrix;

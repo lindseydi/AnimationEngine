@@ -19,9 +19,9 @@ class Link: public Model{
 
 		Link();
 		
-		Link(ModelView mesh, PoseEuler* pose);
+		Link(ModelView mesh, Pose* pose);
 
-		Link(ModelView mesh, PoseEuler* pose, std::string name);
+		Link(ModelView mesh, Pose* pose, std::string name);
 
 		Link(Link& link_copy);
 
@@ -31,9 +31,36 @@ class Link: public Model{
 
 		void rotate(vertex3 rotate);
 
-		void update();
+		virtual void update();
 
 		bool isNull();
 };
 
 #endif
+
+
+#ifndef _LINKROOT_H_
+#define _LINKROOT_H_
+
+#include "Link.h"
+#include "Trajectory.h"
+
+class LinkRoot: public Link{
+	public:
+		Trajectory* path;
+
+		LinkRoot();
+		
+		LinkRoot(ModelView mesh, Pose* pose);
+
+		LinkRoot(ModelView mesh, Pose* pose, std::string name);
+
+		LinkRoot(LinkRoot& link_copy);
+
+		virtual void update();
+
+		void generatePath();
+};
+
+#endif
+

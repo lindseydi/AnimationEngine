@@ -1,9 +1,10 @@
 #ifndef _JOINT_H_
 #define _JOINT_H_
 
-#pragma once;
+//#include "Actor.h"
 #include "vertex3.h"
 #include "matrix4.h"
+#include "Trajectory.h"
 //forward declaration
 class Link;
 
@@ -13,19 +14,20 @@ class Joint{
 		vertex3 outboard_displacement;
 		Link* child;
 		Link* parent;
-		PoseEuler local_pose;
+		Pose local_pose;
 		matrix4 local_transformation;
 		float angle;	//limits rotation to one degree of freedom
 		float angularVelocity;
 		matrix4 rotational_frame;
+		Trajectory* path;
 
 	Joint();
-	Joint(const PoseEuler& localPose);
+	Joint(const Pose& localPose);
 
 	void addLink(Link* child);
 	void translate(vertex3 movement);
 	void rotate();
-
+	void addPointOnPath(PoseKey* controlPoint);
 };
 
 #endif

@@ -13,7 +13,7 @@ class Scene{
 		vector<Actor*> actors;
 		Flock* flock;
 		//Camera* camera;
-		Link* hierarchy;
+		LinkRoot* hierarchy;
 		int frame;
 		vector<Model*> models;
 

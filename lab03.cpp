@@ -21,6 +21,7 @@
 #include "Scene.h"
 #include "Modelview.h"
 #include "RigidBody.h"
+#include "CollisionDetector.h"
 
 #include <iostream>
 #include <vector>
@@ -40,11 +41,21 @@ int g_screenHeight = 0;
 int g_frameIndex = 0;
 
 Scene* scene;
-ModelView box;
+ModelView ball;
+double time;
+double step;
 
 double u;
 GLfloat PofU[7];
 RigidBody sphere;
+
+Model planeXNeg, planeYNeg, planeZNeg;
+Model planeXPos, planeYPos, planeZPos;
+
+vector<polygon*> planes;
+vector<RigidBody> balls;
+
+
 
 //================================
 // init
@@ -55,14 +66,51 @@ void init(void) {
 
 	glMatrixMode(GL_PROJECTION);
 
+	//time data
+	time =0.0;
+	step = 0.01;
+
 	//responsible for global timing in the scene
 	//g_frameIndex = 0;
 	scene = new Scene();
 	//Actor* actor = new Actor(ModelView("resources/knight.txt"));
-	Actor* actor = new Actor(box);
+	ball = ModelView();
+	ball.loadSphere(0.5, 10, 10);
+	Actor* actor = new Actor(ball);
 	//scene->actors.push_back(actor);
 
-	sphere = RigidBody();
+	planeXNeg = Model(new Pose());
+	planeYNeg = Model(new Pose());
+	planeZNeg = Model(new Pose());
+	planeXPos = Model(new Pose());
+	planeYPos = Model(new Pose());
+	planeZPos = Model(new Pose());
+	planeZNeg.mesh.loadPlane(20, 20, -10, 'z', true);
+	planeYNeg.mesh.loadPlane(20, -10, 20, 'y', false);
+	planeXNeg.mesh.loadPlane(-10, 20, 20, 'x', false);
+	planeZPos.mesh.loadPlane(20, 20, 10, 'z', false);
+	planeYPos.mesh.loadPlane(20, 10, 20, 'y', false);		//No Top to box!
+	planeXPos.mesh.loadPlane(10, 20, 20, 'x', true);
+
+	sphere = RigidBody(new Pose(0.0, -5.0, 0.0, 0.0, 1.0, 0.0));
+	scene->models.push_back(&sphere);
+
+	//scene->models.push_back(&planeZNeg);
+	scene->models.push_back(&planeYNeg);
+	//scene->models.push_back(&planeXNeg);
+	//scene->models.push_back(&planeZPos);
+	//scene->models.push_back(&planeYPos);
+	//scene->models.push_back(&planeXPos);
+
+	//ADD Rigid Bodies and Planes to main file data structures
+	planes.push_back(&planeXNeg.mesh.edges.at(0));
+	planes.push_back(&planeYNeg.mesh.edges.at(0));
+	planes.push_back(&planeZNeg.mesh.edges.at(0));
+
+	planes.push_back(&planeXPos.mesh.edges.at(0));
+	planes.push_back(&planeZPos.mesh.edges.at(0));
+
+	balls.push_back(sphere);
 }
 
 Trajectory& createKeyFrames(void){
@@ -70,51 +118,45 @@ Trajectory& createKeyFrames(void){
 	return *path;
 }
 
-//
-//void drawHierarchy(Node* head, matrix3 transform){
-//
-//	Node* ptr = head;
-//	matrix3 T = transform;
-//	printf("\nPrinting Transform parameter from drawHierarchy");
-//	transform.print();
-//		//T builds on itself with each iteration
-//		matrix3 V(4,1);
-//		V(0, 0) = ptr->V.x;
-//		V(1, 0) = ptr->V.y;
-//		V(2, 0) = ptr->V.z;			//V(2,0) = -10.0;
-//		V(3, 0) = 1.0;
-//
-//		matrix3 temp = T * V;
-//		ptr->V = temp.toVector3f();
-//
-//	glPushMatrix();			
-//			matrix3 temp2 = helper::pivot_object(ptr->articulation.getx(), ptr->articulation.gety(), ptr->articulation.getz(), ptr->V);
-//			temp2 = ptr->transformation * helper::translate_object(ptr->V);
-//			ptr->transformation = ptr->transformation * transform;
-//			T = temp2 * ptr->transformation;
-//			applyTransformation(T);
-//			ptr->draw();
-//		
-//		//ptr = ptr->child;
-//		//traverse tree
-//		for(unsigned int i=0; i<ptr->children.size(); i++){
-//			drawHierarchy(ptr->children.at(i), T);
-//		}
-//	glPopMatrix();
-//}
 ////================================
 //// update
 ////================================
-//void update( void ) {
-//	//necessary?	
-//}
+void update( void ) {
+	scene->update(time, step);
+	polygon poly = planeYNeg.mesh.edges.at(0);
+	if(CollisionDetector::intersects(sphere,  planeYNeg.mesh.edges.at(0))){
+		printf("COLLISION!!\n\n\n");
+	
+		//is this all I have to do?
+		//printf("Force %f , ", sphere.force.gety());
+
+		//create an equal and opposite reaction
+		//vertex3 normalForce = poly.normal.normalize() *sphere.force  * -1.0;
+		vertex3 normalForce = poly.normal;
+		normalForce.setx(normalForce.getx() * sphere.force.getx());
+		normalForce.sety(normalForce.gety() * sphere.force.gety());
+		normalForce.setz(normalForce.getz() * sphere.force.getz());
+		//normalForce = normalForce * -1.0f;
+		
+
+		sphere.moveAlongOppositeDirection(time, step);
+		//sphere.moveAlongOppositeDirection(time, step);
+		//sphere.moveAlongOppositeDirection(time, step);
+		sphere.applyNormalForce(normalForce, step);
+		
+	}
+	//here, the reference is not being updated...
+	//	printf("Force   %f\n", sphere.force.gety());
+}
 
 
 //================================
 // render
 //================================
 void render( void ){
-		// clear buffer
+	    time += step;
+	
+	    // clear buffer
 		glClearColor (0.0, 0.0, 0.0, 0.0);
 		glClearDepth (1.0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	
@@ -177,9 +219,22 @@ void reshape( int w, int h ) {
 	glViewport( 0, 0, (GLsizei)w, (GLsizei)h );
 
 	// projection matrix
+	//glMatrixMode( GL_PROJECTION );
+	//glLoadIdentity();
+	//gluPerspective(45.0, (GLfloat)w/(GLfloat)h, 1.0, 2000.0);
+		
+	
+	// projection matrix
 	glMatrixMode( GL_PROJECTION );
 	glLoadIdentity();
-	gluPerspective(45.0, (GLfloat)w/(GLfloat)h, 1.0, 2000.0);
+	gluPerspective(45.0, (GLfloat)w/(GLfloat)h, 0.1, 1000.0);
+	//glTranslatef(0.0, 0.0, -10.0);
+
+	//gluLookAt(0.0, 0.0, -10.0, 0.0, 0.0, -9.0, 0.0, 1.0, 0.0);
+	//when rotating around y, must change x and z values
+	//gluLookAt(10.0, 0.0, 0.0, 9.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+	//gluLookAt(10.0, 3.0, -10.0, 4.0, 0.0, -4.0, 0.0, 1.0, 0.0);
+	gluLookAt(0.0, 3.0, -40.0, 0.0, 0.0, -8.0, 0.0, 1.0, 0.0);
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -191,7 +246,7 @@ void reshape( int w, int h ) {
 void timer( int value ) {	
 	// increase frame index
 	g_frameIndex++;
-	//update();
+	update();
 	
 	// render
 	glutPostRedisplay();
@@ -254,13 +309,10 @@ int main( int argc, char** argv ){
 	glutInitWindowPosition( 100, 100 );
 	glutCreateWindow( "Interpolation Example" );
 
-	box = ModelView();
-	box.loadBox(1.0, 1.0, 1.0);
+
 	// init
 	init();
-
-
-
+	
 	  
 	// set callback functions
 	glutDisplayFunc( render );
@@ -276,3 +328,26 @@ int main( int argc, char** argv ){
 
 	return 0;
 }
+
+
+//white light
+/*
+		// light source attributes
+		GLfloat LightAmbient[]	= { 1.0f, 1.8f, 1.0f, 1.0f };
+		GLfloat LightDiffuse[]	= { 1.0f, 1.0f, 1.0f, 1.0f };
+		GLfloat LightSpecular[]	= { 1.0f, 1.0f, 1.0f, 1.0f };
+		GLfloat LightPosition[] = { 0.0f, 10.0f, 0.0f, 1.0f };
+
+		glLightfv(GL_LIGHT0, GL_AMBIENT , LightAmbient );
+		glLightfv(GL_LIGHT0, GL_DIFFUSE , LightDiffuse );
+		glLightfv(GL_LIGHT0, GL_SPECULAR, LightSpecular);
+		glLightfv(GL_LIGHT0, GL_POSITION, LightPosition);
+		
+		// surface material attributes
+		GLfloat material_Ka[]	= { 1.0f, 1.0f, 1.0f, 1.0f };
+		GLfloat material_Kd[]	= { 1.0f, 1.0f, 1.0f, 1.0f };
+		GLfloat material_Ks[]	= { 1.0f, 1.0f, 1.0f, 1.0f };
+		GLfloat material_Ke[]	= { 0.1f , 0.0f , 0.1f , 1.0f };
+		GLfloat material_Se		= 10;
+
+*/

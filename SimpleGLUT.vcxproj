@@ -153,6 +153,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h" />
+    <ClInclude Include="CollisionDetector.h" />
     <ClInclude Include="Flock.h" />
     <ClInclude Include="Joint.h" />
     <ClInclude Include="Link.h" />
@@ -167,6 +168,7 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="RigidBody.h" />
     <ClInclude Include="Scene.h" />
+    <ClInclude Include="shader.h" />
     <ClInclude Include="StdAfx.h" />
     <ClInclude Include="Trajectory.h" />
     <ClInclude Include="Vector4.h" />
@@ -174,6 +176,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />
+    <None Include="shader\Phong.frag" />
+    <None Include="shader\Phong.vert" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="simpleGlut.rc" />

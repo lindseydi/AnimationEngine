@@ -14,6 +14,7 @@ public:
 	PolygonType type;
 	vector<int> vertexIndices;	//how to save indices...TODO
 	vertex3 normal;
+	float d;	///given point on the plane
 
 	polygon(){
 		//default
@@ -23,6 +24,7 @@ public:
 		type = poly.type;
 		vertexIndices = poly.vertexIndices;
 		normal = poly.normal;
+		d = poly.d;
 	}
 
 	polygon(vector<int> vertexIndices){
@@ -61,6 +63,24 @@ public:
 		this->normal = normal;
 		//calcNorm();
 	}
+
+	polygon(int a, int b, int c, int d, vertex3 normal, float dVal){
+		vertexIndices.push_back(a);
+		vertexIndices.push_back(b);
+		vertexIndices.push_back(c);
+		vertexIndices.push_back(d);
+		type = quad;
+		this->normal = normal;
+		this->d = dVal;
+		//calcNorm();
+	}
+
+	void operator=(polygon& poly){
+		this->d = poly.d;
+		this->normal = poly.normal;
+		this->type = poly.type;
+		this->vertexIndices = poly.vertexIndices;
+	}
 	
 	int getType (void){
 		type = (PolygonType)vertexIndices.size();	//for extra safety
@@ -84,6 +104,11 @@ public:
 		}
 	}
 
+	void calculateD(vertex3 anyPoint){
+		d = normal.dotProduct(anyPoint);
+	}
+
+	//deprecated
 	void calcNorm()
 	{
 		//true for any plane
@@ -100,6 +125,9 @@ public:
 	void addVertex(int index){
 		vertexIndices.push_back(index);
 	}
+
+	public:
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 
 #endif  // _POLYGON_H_

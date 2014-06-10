@@ -37,6 +37,16 @@ class Scene{
 		*/
 	}
 
+	void update(){
+		for(unsigned int i=0; i<models.size(); ++i)
+			models.at(i)->update();
+	}
+
+	void update(double time, double dt){
+		for(unsigned int i=0; i<models.size(); ++i)
+			models.at(i)->update(time, dt);
+	}
+
 };
 
 #endif

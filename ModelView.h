@@ -92,8 +92,58 @@ public:
 		edges.push_back(polygon(6, 7, 4, 5, calcTriangleNorm(6, 7, 4)));
 		edges.push_back(polygon(6, 5, 1, 2, calcTriangleNorm(6, 5, 1)));
 		edges.push_back(polygon(6, 7, 3, 2, calcTriangleNorm(6, 7, 3)));
+
+		//if needed for complex bounding, iterate through egdges and compute D for each polygon
 	}
 
+	void loadPlane(float xLen, float yLen, float zLen, char constantDir, bool flip){
+		clear();
+		//At least 1 len should be constant, and that is denoted with the fourth parameter
+		float halfX = xLen/2.0;
+		float halfY = yLen/2.0;
+		float halfZ = zLen/2.0;
+		vertex3 a, b, c, d;
+		switch(constantDir){
+			case 'x':
+				a = vertex3(xLen, -halfY, -halfZ);
+				b = vertex3(xLen, -halfY,  halfZ);
+				c = vertex3(xLen,  halfY, halfZ);
+				d = vertex3(xLen,  halfY,  -halfZ);
+			break;
+				
+			case 'y' :
+				a = vertex3(-halfX, yLen, halfZ);
+				b = vertex3( halfX, yLen,  halfZ);
+				c = vertex3( halfX, yLen, -halfZ);
+				d = vertex3(-halfX,  yLen, -halfZ);
+			break;
+
+			case 'z':
+				a = vertex3(-halfX, -halfY, zLen);
+				b = vertex3( halfX,  -halfY, zLen);
+				c = vertex3( halfX, halfY, zLen);
+				d = vertex3(-halfX,  halfY, zLen);
+			break;
+		}
+		vertices.push_back(a);
+		vertices.push_back(b);
+		vertices.push_back(c);
+		vertices.push_back(d);
+
+		vertex3 normal = calcTriangleNorm(0, 1, 2);
+		//for(int i=0; i<4; i++)
+		//	normals.push_back(normal);
+
+		float dValue = a.dotProduct(normal);
+		polygon p = polygon(0, 1, 2, 3, normal, dValue);
+		if(flip){
+			normal = normal* -1.0;
+			p.flip();
+		}
+		//p.calculateD(a);
+		edges.push_back(p);
+	}
+	
 	void loadSphere(const float radius, const unsigned int arcSegments, const int slices){
 		clear();
 		float dtheta = 2.0 * PI / (float) arcSegments;
@@ -177,6 +227,10 @@ public:
 		edges.push_back(polygon(2, 3, 0, calcTriangleNorm(2, 3, 0)));
 		edges.push_back(polygon(3, 4, 0, calcTriangleNorm(3, 4, 0)));
 		edges.push_back(polygon(4, 1, 0, calcTriangleNorm(4, 1, 0)));
+
+
+
+		//if needed for complex bounding, iterate through egdges and compute D for each polygon
 	}
 
 vertex3 calcTriangleNorm(vertex3 vec0, vertex3 vec1, vertex3 vec2)
@@ -189,6 +243,7 @@ vertex3 calcTriangleNorm(vertex3 vec0, vertex3 vec1, vertex3 vec2)
 	normal.normalize();
 	return normal;
 }
+
 
 vertex3 calcTriangleNorm(polygon poly){
 	vertex3 edge1 = vertices.at(poly.vertexIndices.at(1)) - vertices.at(poly.vertexIndices.at(0));

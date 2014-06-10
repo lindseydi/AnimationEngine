@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <GL/glut.h>
 #include <GL/glu.h>
+//#include "shader.h"
 
 
 class Renderer{
@@ -62,12 +63,14 @@ public:
 	static void draw(ModelView model){
 		//draw all of the polygons
 		//glutSolidTeapot(0.3);
+//		glUseProgram( shader );
 		 for (unsigned int i=0 ; i < model.edges.size(); i++){
 			 polygon poly = model.edges.at(i);
 			 switch(poly.type){
 				case triangle:
 					glBegin (GL_TRIANGLES);
 					glNormal3f((GLfloat)poly.normal.getx(), (GLfloat)poly.normal.gety(), (GLfloat)poly.normal.getz());		//shouldn't I only have to do this once? TODO, not if shader
+					
 					for(unsigned int i=0; i< 3; i++){
 						int index = poly.vertexIndices.at(i);
 						GLfloat x = (GLfloat)model.vertices.at(index).getx();
@@ -90,6 +93,25 @@ public:
 					glEnd();
 				break;
 			}
+			//To draw vertex normals
+			//For debugging purposes
+			#if 0
+				glBegin (GL_LINES);
+				for (unsigned int i=0 ; i < model.vertices.size(); ++i){
+					glColor3f( 1.0, 0.0, 1.0 );
+					int index = poly.vertexIndices.at(i);
+					GLfloat x = (GLfloat)model.vertices.at(index).getx();
+					GLfloat y = (GLfloat)model.vertices.at(index).gety();
+					GLfloat z = (GLfloat)model.vertices.at(index).getz();
+					glVertex3f(x, y, z);
+					//glVertex3fv (model.vertices[i].getPointer());
+					GLfloat x1 = (model.vertices.at(index).getx() + model.normals.at(index).getx()) * .5f ;
+					GLfloat y1 = (model.vertices.at(index).gety() + model.normals.at(index).gety()) * .5f ;
+					GLfloat z1 = (model.vertices.at(index).getz() + model.normals.at(index).getz()) * .5f ;
+					glVertex3f(x1, y1, z1);
+				}
+				glEnd();
+			#endif
 		 }
 	}
 
@@ -148,11 +170,17 @@ public:
 		glPopMatrix();		
 	}
 
-	static void draw(Scene* scene){
-		//create a frame of reference
+	static void drawReferenceLines() {
+    	glPushMatrix();
 		draw(vertex3(), vertex3(2.0f, 0.0f, 0.0f));
 		draw(vertex3(), vertex3(0.0f, 2.0f, 0.0f));
 		draw(vertex3(), vertex3(0.0f, 0.0f, 2.0f));
+		glPopMatrix();		
+	}
+
+	static void draw(Scene* scene){
+		//create a frame of reference
+		drawReferenceLines();
 
 		for(unsigned int i=0; i<scene->actors.size(); i++){
 			draw(scene->actors.at(i));
@@ -164,6 +192,9 @@ public:
 			//printf("Hierarchy attempting to draw\n");
 			draw(scene->hierarchy);
 		}
+		for(unsigned int i=0; i<scene->models.size(); ++i){
+			draw(*scene->models.at(i));
+		}	
 	}
 
 	static void draw(LinkRoot* hierarchy){
@@ -205,7 +236,6 @@ public:
 			}
 		}
 	}
-	
 
 	static void draw(const Model& model){
 		//draw(model->pose, model->mesh);
@@ -216,6 +246,7 @@ public:
 			draw(model.mesh);
 		glPopMatrix();
 	}
+
 	/*
 	static void draw(Joint* hierarchy, const matrix4& transform){
 		matrix4 local_transform = matrix4();
@@ -243,14 +274,14 @@ public:
 	}
 	*/
 
+
+
 	static void applyTransformation(matrix4& mat){
 		float m[16];
 		matrix4 mat_transpose = mat.transpose();
 		mat_transpose.ToArray(m);
 		glLoadMatrixf( m );
 	}
-
-	
 
 };
 

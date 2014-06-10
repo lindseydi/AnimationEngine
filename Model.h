@@ -36,6 +36,15 @@ public:
 		pose->getEulerRepresentation();
 	}
 
+	virtual void update(){
+		//printf("Executing parent update!\n");
+	}
+
+	virtual void update(double time, double dt){
+		//printf("Executing parent update!\n");
+	}
+
+
 	public:
 		ModelView mesh;
 		Pose* pose;

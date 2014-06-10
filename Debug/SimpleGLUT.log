@@ -1,12 +1,12 @@
-﻿Build started 5/29/2014 3:21:48 PM.
+﻿Build started 6/10/2014 12:36:41 PM.
      1>Project "C:\Users\Lindsey\Documents\Visual Studio 2012\Projects\hierarchy\SimpleGLUT.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /IE:\Eigen\ /IC:\boost_1_55_0\ /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _VC80_UPGRADE=0x0600 /D _MBCS /Gm /EHsc /RTC1 /MTd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo".\Debug/" /Fd".\Debug/vc110.pdb" /Gd /TP /analyze- /errorReport:prompt lab03.cpp
          lab03.cpp
-     1>c:\users\lindsey\documents\visual studio 2012\projects\hierarchy\polygon.h(78): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\lindsey\documents\visual studio 2012\projects\hierarchy\modelview.h(112): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\lindsey\documents\visual studio 2012\projects\hierarchy\modelview.h(125): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\lindsey\documents\visual studio 2012\projects\hierarchy\modelview.h(136): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\lindsey\documents\visual studio 2012\projects\hierarchy\polygon.h(98): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\lindsey\documents\visual studio 2012\projects\hierarchy\modelview.h(162): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\lindsey\documents\visual studio 2012\projects\hierarchy\modelview.h(175): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\lindsey\documents\visual studio 2012\projects\hierarchy\modelview.h(186): warning C4018: '<' : signed/unsigned mismatch
      1>c:\users\lindsey\documents\visual studio 2012\projects\hierarchy\trajectory.h(66): warning C4018: '>' : signed/unsigned mismatch
      1>c:\users\lindsey\documents\visual studio 2012\projects\hierarchy\flock.h(267): warning C4018: '<' : signed/unsigned mismatch
        Link:
@@ -24,4 +24,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:06.44
+Time Elapsed 00:00:06.61

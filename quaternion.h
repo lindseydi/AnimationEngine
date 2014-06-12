@@ -264,6 +264,7 @@ matrix4 getRotation(){
 	rot.matrix(3,3) = 1.0;
 	return rot;
 }
+	public:
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 };

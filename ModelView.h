@@ -413,6 +413,9 @@ void draw_object(float obj_colorR, float obj_colorG, float obj_colorB)
     //#endif
 }
 	*/
+
+	public:
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 
 #endif

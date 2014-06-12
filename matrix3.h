@@ -92,6 +92,10 @@ public:
 	//Only necessary for 4x4 matrix
 	//GLfloat* getGLPtr();
 
+	
+	public:
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
 };
 
 #endif

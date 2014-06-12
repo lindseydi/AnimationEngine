@@ -13,12 +13,17 @@
 #include <stdlib.h>
 #include <GL/glut.h>
 #include <GL/glu.h>
-//#include "shader.h"
+#include "shader.h"
 
+GLuint shader = 0;
 
 class Renderer{
 
 public:
+	static void init(){
+		shader = createShader( "shader/phong" );
+	}
+
 	static void draw(vertex3 point){
 		glPointSize( 4 );
 		glBegin(GL_POINTS);
@@ -63,7 +68,7 @@ public:
 	static void draw(ModelView model){
 		//draw all of the polygons
 		//glutSolidTeapot(0.3);
-//		glUseProgram( shader );
+		glUseProgram( shader );
 		 for (unsigned int i=0 ; i < model.edges.size(); i++){
 			 polygon poly = model.edges.at(i);
 			 switch(poly.type){
@@ -93,9 +98,10 @@ public:
 					glEnd();
 				break;
 			}
+			 glUseProgram( 0 );
 			//To draw vertex normals
 			//For debugging purposes
-			#if 0
+			#if 1
 				glBegin (GL_LINES);
 				for (unsigned int i=0 ; i < model.vertices.size(); ++i){
 					glColor3f( 1.0, 0.0, 1.0 );

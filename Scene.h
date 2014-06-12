@@ -47,6 +47,10 @@ class Scene{
 			models.at(i)->update(time, dt);
 	}
 
+	
+	public:
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
 };
 
 #endif

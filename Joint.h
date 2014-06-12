@@ -28,6 +28,9 @@ class Joint{
 	void translate(vertex3 movement);
 	void rotate();
 	void addPointOnPath(PoseKey* controlPoint);
+
+	public:
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 
 #endif

@@ -1,11 +1,13 @@
 #pragma once
 #include <stdlib.h>
+
+// glew
+#include <glew.h>
+
 #include "Pose.h"
 // standard
 #include <assert.h>
 #include <math.h>
-
-// glut
 
 #include <stdio.h>
 #include <sys/stat.h>
@@ -56,12 +58,21 @@ vector<polygon*> planes;
 vector<RigidBody> balls;
 
 
-
 //================================
 // init
 //================================
 void init(void) {
 	// init something before main loop...
+
+
+	GLenum err = glewInit();
+	if (GLEW_OK != err)
+	{
+	  /* Problem: glewInit failed, something is seriously wrong. */
+	  fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
+	}
+	fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
+
 	glClearColor(1.0, 1.0, 1.0, 0.0);
 
 	glMatrixMode(GL_PROJECTION);
@@ -111,6 +122,7 @@ void init(void) {
 	planes.push_back(&planeZPos.mesh.edges.at(0));
 
 	balls.push_back(sphere);
+	Renderer::init();
 }
 
 Trajectory& createKeyFrames(void){

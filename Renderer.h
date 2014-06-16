@@ -77,11 +77,12 @@ public:
 					glNormal3f((GLfloat)poly.normal.getx(), (GLfloat)poly.normal.gety(), (GLfloat)poly.normal.getz());		//shouldn't I only have to do this once? TODO, not if shader
 					
 					for(unsigned int i=0; i< 3; i++){
-						int index = poly.vertexIndices.at(i);
-						GLfloat x = (GLfloat)model.vertices.at(index).getx();
-						GLfloat y = (GLfloat)model.vertices.at(index).gety();
-						GLfloat z = (GLfloat)model.vertices.at(index).getz();
-						glVertex3f(x, y, z);
+					//	int index = poly.vertexIndices.at(i);
+					//	GLfloat x = (GLfloat)model.vertices.at(index).getx();
+					//	GLfloat y = (GLfloat)model.vertices.at(index).gety();
+					//	GLfloat z = (GLfloat)model.vertices.at(index).getz();
+					//	glVertex3f(x, y, z);
+						glVertex3fv(poly.verts.at(i));
 					}
 					glEnd();
 				break;

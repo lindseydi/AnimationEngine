@@ -69,19 +69,6 @@ public:
 		normals = mesh.normals;
 	}
 
-	polygon createPolyFromIndices(int a, int b, int c){
-		polygon retVal = polygon(vertices.at(a), vertices.at(b), vertices.at(c));		
-		//update indivual vertex normals for shading purposes
-		normals.at(a) = normals.at(a) + retVal.normal;
-		normals.at(b) = normals.at(b) + retVal.normal;
-		normals.at(c) = normals.at(c) + retVal.normal;
-		return retVal;
-	}
-
-	polygon createPolyFromIndices(int a, int b, int c, int d){
-		return polygon(vertices.at(a), vertices.at(b), vertices.at(c), vertices.at(d));
-	}
-
 	void loadBox(float length, float width, float height){
 		clear();
 		//create polygons and vertices
@@ -99,12 +86,12 @@ public:
 		vertices.push_back(vertex3(-length/2, width/2, height/2));	
 
 		//TODO fix error
-		edges.push_back(createPolyFromIndices(0, 1, 2, 3));
-		edges.push_back(createPolyFromIndices(0, 1, 5, 4));
-		edges.push_back(createPolyFromIndices(0, 3, 7, 4));
-		edges.push_back(createPolyFromIndices(6, 7, 4, 5));
-		edges.push_back(createPolyFromIndices(6, 5, 1, 2));
-		edges.push_back(createPolyFromIndices(6, 7, 3, 2));
+		edges.push_back(polygon(0, 1, 2, 3, calcTriangleNorm(0, 1, 2)));
+		edges.push_back(polygon(0, 1, 5, 4, calcTriangleNorm(0, 1, 5)));
+		edges.push_back(polygon(0, 3, 7, 4, calcTriangleNorm(0, 3, 7)));
+		edges.push_back(polygon(6, 7, 4, 5, calcTriangleNorm(6, 7, 4)));
+		edges.push_back(polygon(6, 5, 1, 2, calcTriangleNorm(6, 5, 1)));
+		edges.push_back(polygon(6, 7, 3, 2, calcTriangleNorm(6, 7, 3)));
 
 		//if needed for complex bounding, iterate through egdges and compute D for each polygon
 	}
@@ -143,18 +130,17 @@ public:
 		vertices.push_back(c);
 		vertices.push_back(d);
 
-		//vertex3 normal = calcTriangleNorm(0, 1, 2);
+		vertex3 normal = calcTriangleNorm(0, 1, 2);
 		//for(int i=0; i<4; i++)
 		//	normals.push_back(normal);
 
-		//float dValue = a.dotProduct(normal);
-
-		//create plane face!
-		polygon p = createPolyFromIndices(0, 1, 2, 3);
+		float dValue = a.dotProduct(normal);
+		polygon p = polygon(0, 1, 2, 3, normal, dValue);
 		if(flip){
-			//normal = normal* -1.0;		//why was i doing this?
+			normal = normal* -1.0;
 			p.flip();
 		}
+		//p.calculateD(a);
 		edges.push_back(p);
 	}
 	
@@ -189,59 +175,39 @@ public:
 		for( unsigned int slice = 0; slice < slices + 1; slice++ ) {
 	        for( unsigned int i = 0; i < arcSegments; i++ ) {
 				polygon p = polygon();
-				vector<int> indices;
-				indices.resize(4);
 				if(slice == 0){
 					//top cap - triads(?)
-					p.addVertex(vertices.at(0));
-					indices.push_back(0);
-					if( i < arcSegments - 1 ){
-					   p.addVertex( vertices.at(i + 2) );
-					   indices.push_back(i+2);
-					}else{
-					   p.addVertex( vertices.at(1) );
-					   indices.push_back(1);
-					}
-					p.addVertex( vertices.at(i + 1) );
-					indices.push_back(i+1);
+					p.addVertex(0);
+					 if( i < arcSegments - 1 )
+					   p.addVertex( i + 2 );
+					 else
+					   p.addVertex( 1 );
+					p.addVertex( i + 1 );
 			   } else if( slice > 0 && slice < slices ) {
 					// Quads
-					p.addVertex( vertices.at(arcSegments * (slice - 1) + i + 1) );
-					indices.push_back(arcSegments * (slice - 1) + i + 1);
+					p.addVertex( arcSegments * (slice - 1) + i + 1 );
 					if( i < arcSegments - 1 ) {
-						p.addVertex( vertices.at(arcSegments * (slice - 1) + i + 2) );
-						indices.push_back(arcSegments * (slice - 1) + i + 2);
-						p.addVertex( vertices.at(arcSegments * (slice - 1) + i + 2) );
-						indices.push_back(arcSegments * (slice - 1) + i + 2);
+						p.addVertex( arcSegments * (slice - 1) + i + 2 );
+						p.addVertex( arcSegments * (slice) + i + 2 );
+
 					} else {
-						p.addVertex( vertices.at(arcSegments * (slice - 1) + 1) );
-						indices.push_back(arcSegments * (slice - 1) + 1);
-						p.addVertex( vertices.at(arcSegments * (slice) + 1) );
-						indices.push_back(arcSegments * (slice) + 1);
+						p.addVertex( arcSegments * (slice - 1) + 1 );
+						p.addVertex( arcSegments * (slice) + 1 );
 					}
-					p.addVertex( vertices.at(arcSegments * (slice) + i + 1) );
-					indices.at(arcSegments * (slice) + i + 1);
+					p.addVertex( arcSegments * (slice) + i + 1 );
 				} else if( slice == slices ) {
 					// Bottom Cap - Triads
-					p.addVertex( vertices.at(arcSegments * (slice - 1) + i + 1) );
-					indices.push_back(arcSegments * (slice - 1) + i + 1);
+					p.addVertex( arcSegments * (slice - 1) + i + 1 );
 					if( i < arcSegments - 1 ) {
-						p.addVertex( vertices.at(arcSegments * (slice - 1) + i + 2) );
-						indices.push_back(arcSegments * (slice - 1) + i + 2);
+						p.addVertex( arcSegments * (slice - 1) + i + 2 );
 					} else {
-						p.addVertex( vertices.at(arcSegments * (slice - 1) + 1) );
-						indices.push_back(arcSegments * (slice - 1) + 1);
+						p.addVertex( arcSegments * (slice - 1) + 1 );
 					}
-					p.addVertex( vertices.at(this->vertices.size() - 1) );
-					indices.push_back(this->vertices.size() - 1);
+					p.addVertex( this->vertices.size() - 1 );
 				}
-			    p.calcNorm();
+				p.setNormal(calcTriangleNorm(p));
 				p.flip();      // the sphere is wrong handed for OpenGL. Flip here solves for all polys
-				p.calculateD();
 				edges.push_back(p);
-				//generate normals for indices of each iteration
-				for (std::vector<int>::iterator it = indices.begin() ; it != indices.end(); ++it)
-					normals.at(*it) = normals.at(*it) + p.normal;
 			}
 		}
 	}
@@ -256,39 +222,16 @@ public:
 		vertices.push_back(vertex3(halfBase, -halfHeight, halfBase));
 		vertices.push_back(vertex3(-halfBase, -halfHeight, halfBase));
 
-		edges.push_back(createPolyFromIndices(1, 2, 3, 4));
-		edges.push_back(createPolyFromIndices(1, 2, 0));
-		edges.push_back(createPolyFromIndices(2, 3, 0));
-		edges.push_back(createPolyFromIndices(3, 4, 0));
-		edges.push_back(createPolyFromIndices(4, 1, 0));
+		edges.push_back(polygon(1, 2, 3, 4, calcTriangleNorm(1, 2, 3)));
+		edges.push_back(polygon(1, 2, 0, calcTriangleNorm(1, 2, 0)));
+		edges.push_back(polygon(2, 3, 0, calcTriangleNorm(2, 3, 0)));
+		edges.push_back(polygon(3, 4, 0, calcTriangleNorm(3, 4, 0)));
+		edges.push_back(polygon(4, 1, 0, calcTriangleNorm(4, 1, 0)));
+
+
 
 		//if needed for complex bounding, iterate through egdges and compute D for each polygon
-		//^^this is now done directly from polygon class!
 	}
-
-//will not work with this system
-//void generatenormals(void){
-//	int i;
-//	for(i=0; i<vertices.size(); i++){
-//		normals[i].zero();
-//	}
-//
-//	for(i=0; i<edges.size(); i++){
-//		int type = edges[i].getType();
-//		int firstv = edges[i].geta();
-//		int secondv = edges[i].getb();
-//		int thirdv = edges[i].getc();
-//		int fourthv = edges[i].getd();
-//		vertex3 normal = edges[i].normal;
-//			normals[firstv] = normals[firstv] + normal;
-//			normals[secondv] = normals[secondv] + normal;
-//			normals[thirdv] = normals[thirdv] + normal;
-//			normals[fourthv] = normals[fourthv] + normal;
-//	}
-//	for(i=0; i<vertices.size(); i++){
-//		normals[i].normalize();
-//	}
-//}
 
 vertex3 calcTriangleNorm(vertex3 vec0, vertex3 vec1, vertex3 vec2)
 {
@@ -299,6 +242,27 @@ vertex3 calcTriangleNorm(vertex3 vec0, vertex3 vec1, vertex3 vec2)
 	vertex3 normal = edge1.cross(edge2);
 	normal.normalize();
 	return normal;
+}
+
+
+vertex3 calcTriangleNorm(polygon poly){
+	vertex3 edge1 = vertices.at(poly.vertexIndices.at(1)) - vertices.at(poly.vertexIndices.at(0));
+	edge1.normalize();
+	vertex3 edge2 = vertices.at(poly.vertexIndices.at(2)) - vertices.at(poly.vertexIndices.at(0));
+	edge2.normalize();
+	vertex3 local_normal = edge1.cross(edge2);
+	local_normal.normalize();
+	return local_normal;
+}
+
+vertex3 calcTriangleNorm(int a, int b, int c){
+	vertex3 edge1 = vertices.at(b) - vertices.at(a);
+	edge1.normalize();
+	vertex3 edge2 = vertices.at(c) - vertices.at(a);
+	edge2.normalize();
+	vertex3 local_normal = edge1.cross(edge2);
+	local_normal.normalize();
+	return local_normal;
 }
 
 	void read_file(string filename)
@@ -351,9 +315,9 @@ vertex3 calcTriangleNorm(vertex3 vec0, vertex3 vec1, vertex3 vec2)
 
 			//Put this information into the global vector edges
 			//TODO learn about pointers
-			polygon poly = createPolyFromIndices(a, b, c);
+			polygon poly = polygon(a, b, c, calcTriangleNorm(a, b, c));
 			edges[i] = poly;	//interesting
-			//normals.at(a) = normals.at(a) + poly.normal;	//replaces generatenormals function//taken care of in createPolyFromIndices
+			normals.at(a) = normals.at(a) + poly.normal;	//replaces generatenormals function
 		}
 		//rectangle
 		if(numEdges == 4){
@@ -366,9 +330,9 @@ vertex3 calcTriangleNorm(vertex3 vec0, vertex3 vec1, vertex3 vec2)
 			inFile >> str;
 			int d = atoi(str.c_str()) -1;
 
-			polygon poly = createPolyFromIndices(a, b, c, d);
+			polygon poly = polygon(a, b, c, d);
 			edges[i] = poly;
-			//normals.at(a) = normals.at(a) + poly.normal; //taken care of in "createPolyFromIndices"
+			normals.at(a) = normals.at(a) + poly.normal;
 		}
 	}
 

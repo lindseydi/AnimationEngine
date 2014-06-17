@@ -60,6 +60,9 @@ class LinkRoot: public Link{
 		virtual void update();
 
 		void generatePath();
+
+		public:
+		EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 
 #endif

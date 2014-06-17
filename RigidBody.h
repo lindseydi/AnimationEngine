@@ -28,7 +28,7 @@ class RigidBody: public Model{
 		vertex3 angularVelocity;
 		vertex3 linearAcceleration;		//acceleration
 		vertex3 angularAcceleration;	
-		double linearMomentum;		//momentum
+		vertex3 linearMomentum;		//momentum
 		double angularMomentum;		//angular momentum
 		vertex3 force;	//force
 		vertex3 torque;	//Torque
@@ -117,6 +117,9 @@ class RigidBody: public Model{
 			//update velocity and pose using acceleration!
 			
 			//CALCULATE NEXT POSITION
+			//linearMomentum = linearMomentum + (force * dt);
+
+
 			//assumes a constant acceleration (even though technically it is not)
 			linearVelocity = linearVelocity + (linearAcceleration * dt);
 			moveAlongDirection(time, dt);	//is this skipping a time step? should they be flipped?
@@ -150,7 +153,11 @@ class RigidBody: public Model{
 			///this->force = this->force + normalForce;
 			//v_f = v_i - (N (v_i* N) * (1+k))
 			//linearVelocity = linearVelocity - (normalForce * linearVelocity.dotProduct(normalForce) * (1+k));
-			linearVelocity = linearVelocity * -k;
+			//linearVelocity = linearVelocity * -k;
+			//normalForce.normalize();
+			float dotProduct = linearVelocity.dotProduct(normalForce);
+			linearVelocity = (normalForce * dotProduct * 2.0) + linearVelocity;
+			linearVelocity = linearVelocity * k;	//add dampening effects
 			//linearVelocity = linearVelocity /2.0;
 			//linearVelocity.setx(linearVelocity.getx() - (1-k)*(linearVelocity.getx() * normalForce.getx())* normalForce.getx());
 			//linearVelocity.sety(linearVelocity.gety() - (1-k)*(linearVelocity.gety() * normalForce.gety())* normalForce.gety());

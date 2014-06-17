@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "vertex3.h"
 #include <vector>
 
 enum PolygonType{point = 1, line, triangle, quad, pentagon };
@@ -94,7 +95,7 @@ public:
 
 	void flip( void ) {
 		std::vector<int> tempvertices;
-		int m_vertexCount = vertexIndices.size();
+		unsigned int m_vertexCount = vertexIndices.size();
 		for( unsigned int i = 0; i < m_vertexCount; i++ ) {
 			tempvertices.push_back( vertexIndices.at( i ) );
 		}
@@ -102,6 +103,7 @@ public:
 		for( unsigned int i = m_vertexCount; i > 0; i-- ) {
 			vertexIndices.push_back( tempvertices.at( i - 1 ) );
 		}
+		normal = normal * -1.0;
 	}
 
 	void calculateD(vertex3 anyPoint){

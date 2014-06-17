@@ -145,9 +145,11 @@ void update( void ) {
 		//create an equal and opposite reaction
 		//vertex3 normalForce = poly.normal.normalize() *sphere.force  * -1.0;
 		vertex3 normalForce = poly.normal;
-		normalForce.setx(normalForce.getx() * sphere.force.getx());
-		normalForce.sety(normalForce.gety() * sphere.force.gety());
-		normalForce.setz(normalForce.getz() * sphere.force.getz());
+		float theta = atan2(normalForce.gety(),normalForce.getx());
+		//normalForce.setx(normalForce.getx() * sphere.force.getMagnitude());
+		//normalForce.sety(normalForce.gety() * sphere.force.getMagnitude());
+		//normalForce.setz(normalForce.getz() * sphere.force.getMagnitude());
+		normalForce = normalForce * cos(theta);
 		//normalForce = normalForce * -1.0f;
 		
 
@@ -157,6 +159,14 @@ void update( void ) {
 		sphere.applyNormalForce(normalForce, step);
 		
 	}
+	//if(CollisionDetector::intersects(sphere, balls.at(1))){
+	//	printf("COLLISION WITH SPHERE!!\n\n\n");
+
+		//create an equal and opposite reaction for ONLY the 
+	//	vertex3 normalForce = 
+
+
+	//}
 	//here, the reference is not being updated...
 	//	printf("Force   %f\n", sphere.force.gety());
 }
@@ -183,10 +193,10 @@ void render( void ){
 		glEnable(GL_LIGHT0);
 
 		// light source attributes
-		GLfloat LightAmbient[]	= { 0.4f, 0.4f, 0.4f, 1.0f };
-		GLfloat LightDiffuse[]	= { 0.3f, 0.3f, 0.3f, 1.0f };
+		GLfloat LightAmbient[]	= { 0.6f, 0.6f, 0.6f, 1.0f };
+		GLfloat LightDiffuse[]	= { 1.0f, 1.0f, 1.0f, 1.0f };
 		GLfloat LightSpecular[]	= { 0.4f, 0.4f, 0.4f, 1.0f };
-		GLfloat LightPosition[] = { 5.0f, 5.0f, 5.0f, 1.0f };
+		GLfloat LightPosition[] = { 0.0f, 400.0f, 0.0f, 1.0f };
 
 		glLightfv(GL_LIGHT0, GL_AMBIENT , LightAmbient );
 		glLightfv(GL_LIGHT0, GL_DIFFUSE , LightDiffuse );
@@ -200,13 +210,15 @@ void render( void ){
 		GLfloat material_Ke[]	= { 0.1f , 0.0f , 0.1f , 1.0f };
 		GLfloat material_Se		= 10;
 
+		
 		glMaterialfv(GL_FRONT, GL_AMBIENT	, material_Ka);
 		glMaterialfv(GL_FRONT, GL_DIFFUSE	, material_Kd);
 		glMaterialfv(GL_FRONT, GL_SPECULAR	, material_Ks);
 		glMaterialfv(GL_FRONT, GL_EMISSION	, material_Ke);
 		glMaterialf (GL_FRONT, GL_SHININESS	, material_Se);
+		
 
-		glTranslatef (0.0, 0.0, -5.0);
+		//glTranslatef (0.0, 0.0, -5.0);
 
 		//INSERT DRAW SCENE
 		Renderer::draw(scene);

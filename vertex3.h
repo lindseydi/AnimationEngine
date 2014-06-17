@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <Eigen/Geometry>
+#include <Eigen/StdVector>
 using namespace std;
 using namespace Eigen;
 

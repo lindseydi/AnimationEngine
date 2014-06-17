@@ -22,6 +22,12 @@ class Renderer{
 public:
 	static void init(){
 		shader = createShader( "shader/phong" );
+		//as far as I can tell, the following commands do nothing
+		glEnable(GL_LIGHTING); //Enable lighting
+		glEnable(GL_LIGHT0); //Enable light #0
+		glEnable(GL_LIGHT1); //Enable light #1
+		glEnable(GL_NORMALIZE); //Have OpenGL automatically normalize our normals
+		glShadeModel(GL_SMOOTH); //Enable smooth shading
 	}
 
 	static void draw(vertex3 point){
@@ -75,7 +81,6 @@ public:
 				case triangle:
 					glBegin (GL_TRIANGLES);
 					glNormal3f((GLfloat)poly.normal.getx(), (GLfloat)poly.normal.gety(), (GLfloat)poly.normal.getz());		//shouldn't I only have to do this once? TODO, not if shader
-					
 					for(unsigned int i=0; i< 3; i++){
 						int index = poly.vertexIndices.at(i);
 						GLfloat x = (GLfloat)model.vertices.at(index).getx();
@@ -87,6 +92,7 @@ public:
 				break;
 				case quad:
 					glBegin (GL_QUADS);
+					glColor3f( 0.0, 0.0, 1.0 );
 					glNormal3f((GLfloat)poly.normal.getx(), (GLfloat)poly.normal.gety(), (GLfloat)poly.normal.getz());	
 					for(unsigned int i=0; i< 4; i++){
 						int index = poly.vertexIndices.at(i);
@@ -98,14 +104,14 @@ public:
 					glEnd();
 				break;
 			}
-			 glUseProgram( 0 );
+			glUseProgram( 0 );
 			//To draw vertex normals
 			//For debugging purposes
 			#if 1
 				glBegin (GL_LINES);
-				for (unsigned int i=0 ; i < model.vertices.size(); ++i){
-					glColor3f( 1.0, 0.0, 1.0 );
-					int index = poly.vertexIndices.at(i);
+				glLineWidth(2.0);
+				for (int index=0; index < model.vertices.size(); ++index){
+					glColor3f( 1.0, 0.0, 0.0 );
 					GLfloat x = (GLfloat)model.vertices.at(index).getx();
 					GLfloat y = (GLfloat)model.vertices.at(index).gety();
 					GLfloat z = (GLfloat)model.vertices.at(index).getz();
@@ -288,6 +294,9 @@ public:
 		mat_transpose.ToArray(m);
 		glLoadMatrixf( m );
 	}
+
+	public:
+		EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
 
 };
 

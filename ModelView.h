@@ -17,6 +17,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <Eigen/StdVector>
 
 #include "polygon.h"
 #include "vertex3.h"
@@ -49,8 +50,8 @@ public:
 
 	ModelView(int vert_count, int edge_count){
 		//vertices.resize(vert_count);			//how to size a shared_ptr?
-		normals.resize(vert_count);
-		edges.resize(edge_count);
+		//normals.resize(vert_count);
+		//edges.resize(edge_count);
 	}
 
 	~ModelView(){
@@ -69,6 +70,62 @@ public:
 		normals = mesh.normals;
 	}
 
+	polygon createPolyFromIndices(int a, int b, int c){
+		vertex3 normal = calcTriangleNorm(a, b, c);
+		normals.at(a) = normals.at(a) + normal;
+		normals.at(b) = normals.at(b) + normal;
+		normals.at(c) = normals.at(c) + normal;
+		polygon retVal = polygon(a, b, c, normal);
+		retVal.calculateD(vertices.at(a));
+		return retVal;
+	}
+
+	polygon createPolyFromIndices(int a, int b, int c, int d){
+		vertex3 normal = calcTriangleNorm(a, b, c);
+		normals.at(a) = normals.at(a) + normal;
+		normals.at(b) = normals.at(b) + normal;
+		normals.at(c) = normals.at(c) + normal;
+		normals.at(d) = normals.at(d) + normal;
+		polygon retVal = polygon(a, b, c, d, normal);
+		retVal.calculateD(vertices.at(a));
+		return retVal;
+	}
+
+	polygon createPolyFromIndicesFlipped(int a, int b, int c){
+		vertex3 normal = calcTriangleNorm(a, b, c);
+		polygon retVal = polygon(a, b, c, normal);
+		retVal.flip();
+		normals.at(a) = normals.at(a) + retVal.normal;
+		normals.at(b) = normals.at(b) + retVal.normal;
+		normals.at(c) = normals.at(c) + retVal.normal;
+		retVal.calculateD(vertices.at(a));
+		return retVal;
+	}
+
+	polygon createPolyFromIndicesFlipped(int a, int b, int c, int d){
+		vertex3 normal = calcTriangleNorm(a, b, c);
+		polygon retVal = polygon(a, b, c, d, normal);
+		retVal.flip();
+		normals.at(a) = normals.at(a) + retVal.normal;
+		normals.at(b) = normals.at(b) + retVal.normal;
+		normals.at(c) = normals.at(c) + retVal.normal;
+		normals.at(d) = normals.at(d) + retVal.normal;
+		retVal.calculateD(vertices.at(a));
+		return retVal;
+	}
+
+	polygon createPolyFromIndicesFlipped(vector<int> indices){
+		vertex3 normal = calcTriangleNorm(indices.at(0), indices.at(1), indices.at(2));
+		polygon retVal = polygon(indices);
+		retVal.setNormal(normal);
+		retVal.flip();
+		for(unsigned int i=0; i<indices.size(); ++i){
+			normals.at(i) = normals.at(i) + retVal.normal;
+		}
+		retVal.calculateD(vertices.at(indices.front()));
+		return retVal;
+	}
+
 	void loadBox(float length, float width, float height){
 		clear();
 		//create polygons and vertices
@@ -84,14 +141,15 @@ public:
 		vertices.push_back(vertex3(length/2, width/2, -height/2));
 		vertices.push_back(vertex3(length/2, width/2, height/2));
 		vertices.push_back(vertex3(-length/2, width/2, height/2));	
+		normals.resize(vertices.size());
 
 		//TODO fix error
-		edges.push_back(polygon(0, 1, 2, 3, calcTriangleNorm(0, 1, 2)));
-		edges.push_back(polygon(0, 1, 5, 4, calcTriangleNorm(0, 1, 5)));
-		edges.push_back(polygon(0, 3, 7, 4, calcTriangleNorm(0, 3, 7)));
-		edges.push_back(polygon(6, 7, 4, 5, calcTriangleNorm(6, 7, 4)));
-		edges.push_back(polygon(6, 5, 1, 2, calcTriangleNorm(6, 5, 1)));
-		edges.push_back(polygon(6, 7, 3, 2, calcTriangleNorm(6, 7, 3)));
+		edges.push_back(createPolyFromIndices(0, 1, 2, 3));
+		edges.push_back(createPolyFromIndices(0, 1, 5, 4));
+		edges.push_back(createPolyFromIndices(0, 3, 7, 4));
+		edges.push_back(createPolyFromIndices(6, 7, 4, 5));
+		edges.push_back(createPolyFromIndices(6, 5, 1, 2));
+		edges.push_back(createPolyFromIndices(6, 7, 3, 2));
 
 		//if needed for complex bounding, iterate through egdges and compute D for each polygon
 	}
@@ -129,16 +187,18 @@ public:
 		vertices.push_back(b);
 		vertices.push_back(c);
 		vertices.push_back(d);
+		normals.resize(vertices.size());
 
 		vertex3 normal = calcTriangleNorm(0, 1, 2);
 		//for(int i=0; i<4; i++)
 		//	normals.push_back(normal);
 
 		float dValue = a.dotProduct(normal);
-		polygon p = polygon(0, 1, 2, 3, normal, dValue);
+		polygon p;
 		if(flip){
-			normal = normal* -1.0;
-			p.flip();
+			p = createPolyFromIndicesFlipped(0, 1, 2, 3);
+		}else{
+			p = createPolyFromIndices(0, 1, 2, 3);
 		}
 		//p.calculateD(a);
 		edges.push_back(p);
@@ -170,43 +230,60 @@ public:
 				vertices.push_back(vertex3(x*radius, y* radius, z * radius));
 			}
 		}
+		normals.resize(vertices.size());
 
 		//generate polygons
 		for( unsigned int slice = 0; slice < slices + 1; slice++ ) {
 	        for( unsigned int i = 0; i < arcSegments; i++ ) {
-				polygon p = polygon();
+				//polygon p = polygon();
+				vector<int> indices;
 				if(slice == 0){
 					//top cap - triads(?)
-					p.addVertex(0);
-					 if( i < arcSegments - 1 )
-					   p.addVertex( i + 2 );
-					 else
-					   p.addVertex( 1 );
-					p.addVertex( i + 1 );
+					//p.addVertex(0);
+					indices.push_back(0);
+					 if( i < arcSegments - 1 ){
+					   //p.addVertex( i + 2 );
+					  indices.push_back(i+2);
+					 }else{
+					   //p.addVertex( 1 );
+					   indices.push_back(1);
+					 }
+					//p.addVertex( i + 1 );
+					indices.push_back(i+1);
 			   } else if( slice > 0 && slice < slices ) {
 					// Quads
-					p.addVertex( arcSegments * (slice - 1) + i + 1 );
+					//p.addVertex( arcSegments * (slice - 1) + i + 1 );
+					indices.push_back(arcSegments * (slice - 1) + i + 1);
 					if( i < arcSegments - 1 ) {
-						p.addVertex( arcSegments * (slice - 1) + i + 2 );
-						p.addVertex( arcSegments * (slice) + i + 2 );
-
+						//p.addVertex( arcSegments * (slice - 1) + i + 2 );
+						indices.push_back(arcSegments * (slice - 1) + i + 2 );
+						//p.addVertex( arcSegments * (slice) + i + 2 );
+						indices.push_back(arcSegments * (slice) + i + 2 );
 					} else {
-						p.addVertex( arcSegments * (slice - 1) + 1 );
-						p.addVertex( arcSegments * (slice) + 1 );
+						//p.addVertex( arcSegments * (slice - 1) + 1 );
+						indices.push_back( arcSegments * (slice - 1) + 1 );
+						//p.addVertex( arcSegments * (slice) + 1 );
+						indices.push_back( arcSegments * (slice) + 1 );
 					}
-					p.addVertex( arcSegments * (slice) + i + 1 );
+					//p.addVertex( arcSegments * (slice) + i + 1 );
+					indices.push_back( arcSegments * (slice) + i + 1 );
 				} else if( slice == slices ) {
 					// Bottom Cap - Triads
-					p.addVertex( arcSegments * (slice - 1) + i + 1 );
+					//p.addVertex( arcSegments * (slice - 1) + i + 1 );
+					indices.push_back(arcSegments * (slice - 1) + i + 1 );
 					if( i < arcSegments - 1 ) {
-						p.addVertex( arcSegments * (slice - 1) + i + 2 );
+						//p.addVertex( arcSegments * (slice - 1) + i + 2 );
+						indices.push_back( arcSegments * (slice - 1) + i + 2 );
 					} else {
-						p.addVertex( arcSegments * (slice - 1) + 1 );
+						//p.addVertex( arcSegments * (slice - 1) + 1 );
+						indices.push_back( arcSegments * (slice - 1) + 1 );
 					}
-					p.addVertex( this->vertices.size() - 1 );
+					//p.addVertex( this->vertices.size() - 1 );
+					indices.push_back( this->vertices.size() - 1 );
 				}
-				p.setNormal(calcTriangleNorm(p));
-				p.flip();      // the sphere is wrong handed for OpenGL. Flip here solves for all polys
+				//p.setNormal(calcTriangleNorm(p));
+				// the sphere is wrong handed for OpenGL. Flip here solves for all polys
+				polygon p = createPolyFromIndicesFlipped(indices);
 				edges.push_back(p);
 			}
 		}
@@ -221,15 +298,13 @@ public:
 		vertices.push_back(vertex3(halfBase, -halfHeight, -halfBase));
 		vertices.push_back(vertex3(halfBase, -halfHeight, halfBase));
 		vertices.push_back(vertex3(-halfBase, -halfHeight, halfBase));
+		normals.resize(vertices.size());
 
-		edges.push_back(polygon(1, 2, 3, 4, calcTriangleNorm(1, 2, 3)));
-		edges.push_back(polygon(1, 2, 0, calcTriangleNorm(1, 2, 0)));
-		edges.push_back(polygon(2, 3, 0, calcTriangleNorm(2, 3, 0)));
-		edges.push_back(polygon(3, 4, 0, calcTriangleNorm(3, 4, 0)));
-		edges.push_back(polygon(4, 1, 0, calcTriangleNorm(4, 1, 0)));
-
-
-
+		edges.push_back(createPolyFromIndices(1, 2, 3, 4));
+		edges.push_back(createPolyFromIndices(1, 2, 0));
+		edges.push_back(createPolyFromIndices(2, 3, 0));
+		edges.push_back(createPolyFromIndices(3, 4, 0));
+		edges.push_back(createPolyFromIndices(4, 1, 0));
 		//if needed for complex bounding, iterate through egdges and compute D for each polygon
 	}
 
@@ -300,7 +375,7 @@ vertex3 calcTriangleNorm(int a, int b, int c){
 		vertices.push_back(vertex3(x, y, z));
 		//vertices.at(i) = vertex3(x, y, z);
 	}
-	edges.resize(edge_count);
+	//edges.resize(edge_count);
 	for(i=0; i<edge_count; i++){
 		inFile >> str;
 		int numEdges = atoi(str.c_str());
@@ -416,6 +491,7 @@ void draw_object(float obj_colorR, float obj_colorG, float obj_colorB)
 
 	public:
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+	//EIGEN_DEFINE_STL_VECTOR_SPECIALIZATION(Vector3f)
 };
 
 #endif

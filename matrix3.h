@@ -6,12 +6,11 @@
 #include <stdlib.h>
 #include <GL/glut.h>
 #include <Eigen/Geometry>
-using namespace Eigen;
 
 class matrix3{
 public:
 	//Contains an Eigen Matrix in order to handle math.
-	Matrix3f matrix;
+	Eigen::Matrix3f matrix; 
 	//Constructors
 	void zero(){
 		for(unsigned int i=0; i<3; ++i){
@@ -22,12 +21,12 @@ public:
 	}
 
 	matrix3(){
-		matrix = Matrix3f();
+		matrix = Eigen::Matrix3f();
 		matrix.Zero();
 	}
 
 	matrix3(const matrix3& mat){
-		matrix = Matrix3f(mat.matrix);
+		matrix = Eigen::Matrix3f(mat.matrix);
 	}
 
 	void identity(){
@@ -35,7 +34,7 @@ public:
 	}
 
 	//Operators
-	float operator()(int x, int y){
+	float& operator()(int x, int y){
 		//allows access to a certain row/col of the matrix
 		return matrix(x, y);
 	}
@@ -60,6 +59,15 @@ public:
 	matrix3 operator*(double scalar){
 		matrix3 retVal;
 		retVal.matrix = matrix * scalar;
+		return retVal;
+	}
+
+	vertex3 operator*(const vertex3& vector){
+		vertex3 retVal;
+		Eigen::Vector3f vector3f = Eigen::Vector3f(vector.getx(), vector.gety(), vector.getz());
+		//unlikely eigen will allow this
+		Eigen::Vector3f product = this->matrix * vector3f;
+		retVal = vertex3(product(0, 0), product(1,0), product(2,0));
 		return retVal;
 	}
 

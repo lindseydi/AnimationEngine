@@ -37,21 +37,39 @@ public:
 	vector<vertex3> vertices;
 	vector<polygon> edges;
 	vector<vertex3> normals;	//necessary but difficult to implement
+	vertex3 color;
 
 	ModelView(void){
 		vertices.clear();
 		edges.clear();
 		normals.clear();
+		color = vertex3(1.0, 0.0, 0.0);
+	}
+
+	ModelView(const vertex3& color){
+		vertices.clear();
+		edges.clear();
+		normals.clear();
+		this->color = color;
 	}
 	
 	ModelView(string filename){
 		read_file(filename);
+		color = vertex3(1.0, 0.0, 0.0);
 	}
 
 	ModelView(int vert_count, int edge_count){
-		//vertices.resize(vert_count);			//how to size a shared_ptr?
-		//normals.resize(vert_count);
-		//edges.resize(edge_count);
+		vertices.resize(vert_count);			//how to size a shared_ptr?
+		normals.resize(vert_count);
+		edges.resize(edge_count);
+		color = vertex3(1.0, 0.0, 0.0);
+	}
+
+	ModelView(const ModelView& copy){
+		this->vertices = copy.vertices;
+		this->edges = copy.edges;
+		this->normals = copy.normals;
+		color = copy.color;
 	}
 
 	~ModelView(){
@@ -68,6 +86,33 @@ public:
 		vertices = mesh.vertices;
 		edges = mesh.edges;
 		normals = mesh.normals;
+		color = mesh.color;
+	}
+
+	vertex3 calculateCenter(int a, int b, int c){
+		vertex3 av, bv, cv, dv;
+		av = vertices.at(a);
+		bv = vertices.at(b);
+		cv = vertices.at(c);
+		float x, y, z;
+		//find x center
+		if(av.getx() == bv.getx())
+			x = av.getx() - cv.getx()/2.0;
+		else
+			x = av.getx() - bv.getx()/2.0;
+
+		//find y center
+		if(av.gety() == bv.gety())
+			y = av.gety() - cv.gety()/2.0;
+		else
+			y = av.gety() - bv.gety()/2.0;
+
+		//find z center
+		if(av.getz() == bv.getz())
+			z = av.getz() - cv.getz()/2.0;
+		else
+			z = av.getz() - bv.getz()/2.0;
+		return vertex3(x, y, z);
 	}
 
 	polygon createPolyFromIndices(int a, int b, int c){
@@ -77,6 +122,8 @@ public:
 		normals.at(c) = normals.at(c) + normal;
 		polygon retVal = polygon(a, b, c, normal);
 		retVal.calculateD(vertices.at(a));
+		//calculate center
+		retVal.center = calculateCenter(a, b, c);
 		return retVal;
 	}
 
@@ -88,6 +135,7 @@ public:
 		normals.at(d) = normals.at(d) + normal;
 		polygon retVal = polygon(a, b, c, d, normal);
 		retVal.calculateD(vertices.at(a));
+		retVal.center = calculateCenter(a, b, c);
 		return retVal;
 	}
 
@@ -99,6 +147,7 @@ public:
 		normals.at(b) = normals.at(b) + retVal.normal;
 		normals.at(c) = normals.at(c) + retVal.normal;
 		retVal.calculateD(vertices.at(a));
+		retVal.center = calculateCenter(a, b, c);
 		return retVal;
 	}
 
@@ -111,6 +160,7 @@ public:
 		normals.at(c) = normals.at(c) + retVal.normal;
 		normals.at(d) = normals.at(d) + retVal.normal;
 		retVal.calculateD(vertices.at(a));
+		retVal.center = calculateCenter(a, b, c);
 		return retVal;
 	}
 
@@ -123,6 +173,7 @@ public:
 			normals.at(i) = normals.at(i) + retVal.normal;
 		}
 		retVal.calculateD(vertices.at(indices.front()));
+		retVal.center = calculateCenter(indices.at(0), indices.at(1), indices.at(2));
 		return retVal;
 	}
 
@@ -144,7 +195,7 @@ public:
 		normals.resize(vertices.size());
 
 		//TODO fix error
-		edges.push_back(createPolyFromIndices(0, 1, 2, 3));
+		edges.push_back(createPolyFromIndices(3, 2, 1, 0));
 		edges.push_back(createPolyFromIndices(0, 1, 5, 4));
 		edges.push_back(createPolyFromIndices(0, 3, 7, 4));
 		edges.push_back(createPolyFromIndices(6, 7, 4, 5));
@@ -156,6 +207,7 @@ public:
 
 	void loadPlane(float xLen, float yLen, float zLen, char constantDir, bool flip){
 		clear();
+		//this->color = vertex3(0.0, 0.0, 1.0);
 		//At least 1 len should be constant, and that is denoted with the fourth parameter
 		float halfX = xLen/2.0;
 		float halfY = yLen/2.0;
@@ -189,11 +241,6 @@ public:
 		vertices.push_back(d);
 		normals.resize(vertices.size());
 
-		vertex3 normal = calcTriangleNorm(0, 1, 2);
-		//for(int i=0; i<4; i++)
-		//	normals.push_back(normal);
-
-		float dValue = a.dotProduct(normal);
 		polygon p;
 		if(flip){
 			p = createPolyFromIndicesFlipped(0, 1, 2, 3);
@@ -308,7 +355,7 @@ public:
 		//if needed for complex bounding, iterate through egdges and compute D for each polygon
 	}
 
-vertex3 calcTriangleNorm(vertex3 vec0, vertex3 vec1, vertex3 vec2)
+vertex3 calcTriangleNorm(const vertex3& vec0, vertex3 vec1, vertex3 vec2)
 {
 	vertex3 edge1 = vec1 - vec0;
 	edge1.normalize();
@@ -320,7 +367,7 @@ vertex3 calcTriangleNorm(vertex3 vec0, vertex3 vec1, vertex3 vec2)
 }
 
 
-vertex3 calcTriangleNorm(polygon poly){
+vertex3 calcTriangleNorm(const polygon& poly){
 	vertex3 edge1 = vertices.at(poly.vertexIndices.at(1)) - vertices.at(poly.vertexIndices.at(0));
 	edge1.normalize();
 	vertex3 edge2 = vertices.at(poly.vertexIndices.at(2)) - vertices.at(poly.vertexIndices.at(0));

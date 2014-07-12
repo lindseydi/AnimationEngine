@@ -19,21 +19,24 @@ class Link: public Model{
 
 		Link();
 		
-		Link(ModelView mesh, Pose* pose);
+		Link(const ModelView& mesh, Pose* pose);
 
-		Link(ModelView mesh, Pose* pose, std::string name);
+		Link(const ModelView& mesh, Pose* pose, std::string name);
 
-		Link(Link& link_copy);
+		Link(const Link& link_copy);
 
 		void addChild(Joint* joint);
 
-		void translate(vertex3 movement);
+		void translate(const vertex3& movement);
 
-		void rotate(vertex3 rotate);
+		void rotate(const vertex3& rotate);
 
 		virtual void update();
 
 		bool isNull();
+
+		public:
+		EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 
 #endif
@@ -51,11 +54,11 @@ class LinkRoot: public Link{
 
 		LinkRoot();
 		
-		LinkRoot(ModelView mesh, Pose* pose);
+		LinkRoot(const ModelView& mesh, Pose* pose);
 
-		LinkRoot(ModelView mesh, Pose* pose, std::string name);
+		LinkRoot(const ModelView& mesh, Pose* pose, std::string name);
 
-		LinkRoot(LinkRoot& link_copy);
+		LinkRoot(const LinkRoot& link_copy);
 
 		virtual void update();
 

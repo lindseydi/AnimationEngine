@@ -38,6 +38,7 @@ class Pose{
 			rotation_quat = rot;
 		}
 
+		//copy constructor
 		Pose(const Pose& pose){
 			this->position = pose.position;
 			this->orientation = pose.orientation;
@@ -48,6 +49,12 @@ class Pose{
 			position.set(x, y, z);
 			orientation = new vertex3(theta, phi, psi);
 			rotation_quat.set(theta, phi, psi);
+		}
+
+		void operator=(const Pose& copy){
+			this->position = copy.position;
+			this->orientation = copy.orientation;
+			this->rotation_quat = copy.rotation_quat;
 		}
 
 		//Will return an array of seven elements

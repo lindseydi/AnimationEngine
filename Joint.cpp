@@ -29,7 +29,7 @@ void Joint::addLink(Link* child){
 	printf("Pointer has been set\n");
 }
 
-void Joint::translate(vertex3 movement){
+void Joint::translate(const vertex3& movement){
 	//how much to move, or where to move to?
 	//simply add how much it moves to it's pose
 

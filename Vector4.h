@@ -14,30 +14,19 @@
 
 #include "matrix4.h"
 using namespace std;
-using namespace Eigen;
-
 
 class Vector4
 {
 public:
-	Vector4f vector;
+	Eigen::Vector4f vector;
 	Vector4(void){
-		vector.x() = 0.0f;
-		vector.y() = 0.0f;
-		vector.z() = 0.0f;
-		vector.w() = 1.0f;
+		vector = Eigen::Vector4f(0.0f, 0.0f, 0.0f, 1.0f);
 	}	
 	Vector4 (float value){
-		vector.x() = value;
-		vector.y() = value;
-		vector.z() = value;
-		vector.w() = value;
+		vector = Eigen::Vector4f(value, value, value, value);
 	}
 	Vector4(float xin, float yin, float zin, float win){
-		vector.x() = xin;
-		vector.y() = yin;
-		vector.z() = zin;
-		vector.w() = win;
+		vector = Eigen::Vector4f(xin, yin, zin, win);
 	}
 
 	void zero(void){
@@ -47,18 +36,18 @@ public:
 		vector.w() = 0.0f;
 	}
 
-	float getx (void){
+	float getx (void) const{
 		return vector.x();
 	}
 
-	float gety (void){
+	float gety (void) const{
 		return vector.y();
 	}
-	float getz (void){
+	float getz (void) const {
 		return vector.z();
 	}
 
-	float getw (void){
+	float getw (void) const{
 		return vector.w();
 	}
 
@@ -186,7 +175,7 @@ public:
 */
 
 	private:
-		void set(const Vector4f& in){
+		void set(const Eigen::Vector4f& in){
 			vector = in;
 		}
 	public:

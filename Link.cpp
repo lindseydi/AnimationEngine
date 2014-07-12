@@ -5,15 +5,15 @@ Link::Link(): Model(){
 	parent = NULL;
 }
 
-Link::Link(ModelView mesh, Pose* pose): Model(mesh, pose){
+Link::Link(const ModelView& mesh, Pose* pose): Model(mesh, pose){
 	//do nothing
 }
 
-Link::Link(ModelView mesh, Pose* pose, std::string name): Model(mesh, pose){
+Link::Link(const ModelView& mesh, Pose* pose, std::string name): Model(mesh, pose){
 	this->name = name;
 }
 
-Link::Link(Link& link_copy){
+Link::Link(const Link& link_copy){
 	for(unsigned int i=0; i<link_copy.children.size(); i++)
 		this->children.push_back(link_copy.children.at(i));
 	this->parent = link_copy.parent;
@@ -69,12 +69,12 @@ LinkRoot::LinkRoot(): Link(){
 }
 	
 
-LinkRoot::LinkRoot(ModelView mesh, Pose* pose): Link(mesh, pose){
+LinkRoot::LinkRoot(const ModelView& mesh, Pose* pose): Link(mesh, pose){
 	path = new Trajectory(1);
 	generatePath();
 }
 
-LinkRoot::LinkRoot(ModelView mesh, Pose* pose, std::string name): Link(mesh, pose, name){
+LinkRoot::LinkRoot(const ModelView& mesh, Pose* pose, std::string name): Link(mesh, pose, name){
 	path = new Trajectory(1);
 	generatePath();
 }

@@ -11,29 +11,26 @@
 #include <Eigen/Geometry>
 #include <Eigen/StdVector>
 using namespace std;
-using namespace Eigen;
-
 
 class vertex3
 {
 public:
-	Vector3f vertex;
+	Eigen::Vector3f vertex;
 	vertex3(void){
-		vertex.x() = 0.0f;
-		vertex.y() = 0.0f;
-		vertex.z() = 0.0f;
+		vertex = Eigen::Vector3f(0.0, 0.0, 0.0);
 	}
 
 	vertex3 (float value){
-		vertex.x() = value;
-		vertex.y() = value;
-		vertex.z() = value;
+		vertex = Eigen::Vector3f(value, value, value);
 	}
 
 	vertex3(float xin, float yin, float zin){
-		vertex.x() = xin;
-		vertex.y() = yin;
-		vertex.z() = zin;
+		vertex = Eigen::Vector3f(xin, yin, zin);	
+	}
+
+	vertex3(const vertex3& copy){
+		vertex = Eigen::Vector3f(copy.vertex);
+		//this->vertex = copy.vertex;
 	}
 
 	void zero(void){
@@ -42,18 +39,18 @@ public:
 		vertex.z() = 0.0f;
 	}
 
-	vertex3 toVertex3(const Vector3f vector){
+	vertex3 toVertex3(const Eigen::Vector3f& vector){
 		return vertex3(vector.x(), vector.y(), vector.z());
 	}
 
-	float getx (void){
+	float getx (void) const{
 		return vertex.x();
 	}
 
-	float gety (void){
+	float gety (void) const {
 		return vertex.y();
 	}
-	float getz (void){
+	float getz (void) const {
 		return vertex.z();
 	}
 
@@ -76,11 +73,11 @@ public:
 		this->vertex = in.vertex;
 	}
 
-	void set(const Vector3f in){
+	void set(const Eigen::Vector3f& in){
 		vertex = in;
 	}
 	//probably unecessary
-	vertex3& getObjectPointer(){
+	vertex3& getObjectPointer() {
 		return *this;
 	}/*
 
@@ -104,11 +101,19 @@ public:
 	}
 		*/
 
-	bool isApprox(vertex3 compare){
+	bool isApprox(const vertex3& compare){
 		if(this->vertex.isApprox(compare.vertex))
 			return true;
 		else 
 			return false;
+	}
+
+	bool isZero(){
+		return vertex.isZero();
+	}
+
+	void operator=(const vertex3& copy){
+		this->vertex = copy.vertex;
 	}
 
 	vertex3 operator-(const vertex3& vec){
@@ -136,23 +141,23 @@ public:
 		return ret;
 	}
 
-	Vector3f toEigen(const vertex3 nonEigenVector){
+	Eigen::Vector3f toEigen(const vertex3& nonEigenVector){
 		return nonEigenVector.vertex;
 	}
 
-	float dotProduct(const vertex3 vec){
+	float dotProduct(const vertex3& vec){
 		//Return dot product of this * input
 		return vertex.dot(vec.vertex);
 	}
 
-	vertex3 cross (const vertex3 vec){
+	vertex3 cross (const vertex3& vec){
 		/*
 		float X = ((y * vec.z) - (vec.y * z));
 		float Y = ((z * vec.x) - (vec.z * x));
 		float Z = ((x * vec.y) - (vec.x * y));
 		return vertex3(X, Y, Z);
 		*/
-		Vector3f retVal = vertex.cross(vec.vertex);
+		Eigen::Vector3f retVal = vertex.cross(vec.vertex);
 		return  toVertex3(retVal);
 	}
 
@@ -160,7 +165,7 @@ public:
 		printf("----%f  %f  %f\n", this->getx(), this->gety(), this->getz());
 	}
 
-	float getMagnitude(){
+	float getMagnitude() const{
 		float x = this->vertex.x();
 		float y = this->vertex.y();
 		float z = this->vertex.z();

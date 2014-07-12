@@ -235,7 +235,7 @@ class Trajectory{
 					// interpolation
 					
 					Eigen::MatrixXf interpolation = T*M*G;				//multipying vectors and matrices
-					PofU[i] = (float)interpolation(0,0);			//what do we do with this?
+					PofU[i] = (float)interpolation(0,0);				//what do we do with this?
 
 			//	printf("---%d %f %f\n", i, PofU[i], interpolation(0,0));
 			//		cout << "The matrix T is:\n" << endl << T << endl;

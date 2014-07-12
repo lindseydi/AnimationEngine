@@ -7,14 +7,15 @@
 #include <Eigen/Geometry>
 #include <math.h>
 #include "matrix4.h"
+#include "matrix3.h"
 //Needed for Quaternionf
-using namespace Eigen;
 
 class quaternion{
 public:
-	Quaternionf quat;
+	Eigen::Quaternionf quat;
 	//Default Constructor
 	quaternion() {
+		quat = Eigen::Quaternionf();
 		quat.x() = 0.0f;
 		quat.y() = 0.0f;
 		quat.z() = 0.0f;
@@ -22,6 +23,7 @@ public:
 	}
 	//! Constructor
 	quaternion(float x, float y, float z, float w) {
+		quat = Eigen::Quaternionf();
 		this->quat.x() = x;
 		this->quat.y() = y;
 		this->quat.z() = z;
@@ -30,11 +32,13 @@ public:
 
 	//! Constructor which converts euler angles (radians) to a quaternion
 	quaternion(float x, float y, float z){
+		quat = Eigen::Quaternionf();
 		*this = set(x, y, z);
 	}
 
 	//! Constructor which converts euler angles (radians) to a quaternion
 	quaternion(const vertex3& vec){ 
+		quat = Eigen::Quaternionf();
 		*this = set(vec.vertex.x(), vec.vertex.y(), vec.vertex.z());
 	}
 
@@ -82,22 +86,22 @@ public:
 		return normalize();
 	}
 
-	float getx(){
+	float getx() const {
 		return quat.x();
 	}
 
-	float gety(){
+	float gety() const{
 		return quat.y();
 	}
 
-	float getz(){
+	float getz()const {
 		return quat.z();
 	}
 	
-	float getw(){
+	float getw()const{
 		return quat.w();
 	}
-quaternion& quaternion::normalize()
+quaternion& normalize()
 {
 		/*
 		float magnitude = sqrt(W*W + X*X + Y*Y + Z*Z);
@@ -136,7 +140,7 @@ quaternion operator*(float scalar) const
 
 
 //*= multiplication operator
-quaternion& quaternion::operator*=(float scalar)
+quaternion& operator*=(float scalar)
 {
 	this->quat.x() *=scalar;
 	this->quat.y() *=scalar;
@@ -152,7 +156,7 @@ quaternion& operator*=(const quaternion& input)
 	return *this;
 }
 
-quaternion& rotate(float angle, vertex3 axis){
+quaternion& rotate(float angle, const vertex3& axis){
 	quaternion local_rotation;
 
 	//axis is a unit vector
@@ -179,7 +183,7 @@ quaternion& rotate(float angle, float axisX, float axisY, float axisZ){
 	return (*this = (local_rotation) * (*this));
 }
 
-float dot(quaternion& input){
+float dot(const quaternion& input){
 	//return (this->X * input.X) + (this->Y * input.Y) + (this->Z * input.Z) + (this->W * input.W);
 	float retVal = this->quat.dot(input.quat);
 	return retVal;
@@ -238,6 +242,30 @@ vertex3 toEuler(){
 	double attitude = asin(2*test);
 	double bank = atan2(2*X*W-2*Y*Z , 1 - 2*sqx - 2*sqz);
 	return vertex3(heading, attitude, bank);
+}
+
+matrix3 getRotation_matrix3(){
+	//TODO 
+	//test this!
+	float X =  quat.x();
+	float Y =  quat.y();
+	float Z =  quat.z();
+	float W =  quat.w();
+
+	matrix3 rot;
+	rot(0,0) = 1-2*Y*Y -2*Z*Z;
+	rot(0,1) = 2*X*Y - 2*W*Z;
+	rot(0,2) = 2*X*Z + 2*W*Y;
+
+	rot(1,0) = 2*X*Y + 2*W*Z;
+	rot(1,1) = 1-2*X*X - 2*Z*Z;
+	rot(1,2) = 2*Y*Z - 2*W*X;
+
+	rot(2,0) = 2*X*Z - 2*W*Y;
+	rot(2,1) = 2*Y*Z + 2*W*X;
+	rot(2,2) = 1- 2*X*X - 2*Y*Y;
+
+	return rot;
 }
 
 matrix4 getRotation(){

@@ -1,3 +1,5 @@
+/*
+
 #pragma once
 #include <stdlib.h>
 
@@ -25,6 +27,7 @@
 #include "RigidBody.h"
 #include "CollisionDetector.h"
 
+
 #include <iostream>
 #include <vector>
 
@@ -43,24 +46,33 @@ int g_screenHeight = 0;
 int g_frameIndex = 0;
 
 Scene* scene;
-ModelView ball;
 double time;
 double step;
 
 double u;
 GLfloat PofU[7];
-RigidBody sphere;
 
+Model box;
 Model planeXNeg, planeYNeg, planeZNeg;
 Model planeXPos, planeYPos, planeZPos;
 
-vector<polygon*> planes;
-vector<RigidBody> balls;
+vector<polygon> planes;
+const int numBalls = 20;
+vector<RigidBody*> balls;
 
 
 //================================
 // init
 //================================
+//init helper function in order to create no overlapping balls from the start
+void changePosition(RigidBody* body){
+	float x, y, z;
+	x = Helper::randBetween_float(-9.0, 9.0);
+	y = Helper::randBetween_float(9.75, 3.0);
+	z = Helper::randBetween_float(-9.0, 9.0);
+	body->pose->position = vertex3(x, y, z); 
+}
+
 void init(void) {
 	// init something before main loop...
 
@@ -68,7 +80,7 @@ void init(void) {
 	GLenum err = glewInit();
 	if (GLEW_OK != err)
 	{
-	  /* Problem: glewInit failed, something is seriously wrong. */
+	 //Problem: glewInit failed, something is seriously wrong.
 	  fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
 	}
 	fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
@@ -79,49 +91,76 @@ void init(void) {
 
 	//time data
 	time =0.0;
-	step = 0.01;
+	step = 0.03333;
 
-	//responsible for global timing in the scene
-	//g_frameIndex = 0;
 	scene = new Scene();
-	//Actor* actor = new Actor(ModelView("resources/knight.txt"));
-	ball = ModelView();
-	ball.loadSphere(0.5, 10, 10);
-	Actor* actor = new Actor(ball);
-	//scene->actors.push_back(actor);
 
-	planeXNeg = Model(new Pose());
-	planeYNeg = Model(new Pose());
-	planeZNeg = Model(new Pose());
-	planeXPos = Model(new Pose());
-	planeYPos = Model(new Pose());
-	planeZPos = Model(new Pose());
+	vertex3 blue = vertex3(0.0, 0.0, 1.0);
+	planeXNeg = Model(new Pose(), blue);
+	planeYNeg = Model(new Pose(), blue);
+	planeZNeg = Model(new Pose(), blue);
+	planeXPos = Model(new Pose(), blue);
+	planeYPos = Model(new Pose(), blue);
+	planeZPos = Model(new Pose(), blue);
 	planeZNeg.mesh.loadPlane(20, 20, -10, 'z', true);
 	planeYNeg.mesh.loadPlane(20, -10, 20, 'y', false);
 	planeXNeg.mesh.loadPlane(-10, 20, 20, 'x', false);
 	planeZPos.mesh.loadPlane(20, 20, 10, 'z', false);
-	planeYPos.mesh.loadPlane(20, 10, 20, 'y', false);		//No Top to box!
+	planeYPos.mesh.loadPlane(20, 10, 20, 'y', false);		
 	planeXPos.mesh.loadPlane(10, 20, 20, 'x', true);
-
-	sphere = RigidBody(new Pose(0.0, -5.0, 0.0, 0.0, 1.0, 0.0));
-	scene->models.push_back(&sphere);
-
-	//scene->models.push_back(&planeZNeg);
-	scene->models.push_back(&planeYNeg);
-	//scene->models.push_back(&planeXNeg);
-	//scene->models.push_back(&planeZPos);
-	//scene->models.push_back(&planeYPos);
-	//scene->models.push_back(&planeXPos);
+	
+	//create Balls
+	for(int i=0; i<numBalls; i++){
+		float x, y, z;
+		x = Helper::randBetween_float(-9.0, 9.0);
+		y = Helper::randBetween_float(9.75, 5.0);
+		z = Helper::randBetween_float(-9.0, 9.0);
+		vertex3 randPosition = vertex3(x, y, z);
+		
+		RigidBody* body = new RigidBody(new Pose(randPosition, vertex3()));
+	
+		while(CollisionDetector::intersects(body, balls)){
+				changePosition(body);
+		}
+		balls.push_back(body);
+		scene->models.push_back(body);
+	}
 
 	//ADD Rigid Bodies and Planes to main file data structures
-	planes.push_back(&planeXNeg.mesh.edges.at(0));
-	planes.push_back(&planeYNeg.mesh.edges.at(0));
-	planes.push_back(&planeZNeg.mesh.edges.at(0));
+	planes.push_back(planeXNeg.mesh.edges.at(0));
+	planes.push_back(planeYNeg.mesh.edges.at(0));
+	planes.push_back(planeZNeg.mesh.edges.at(0));
+	//no need to add ypos
+	planes.push_back(planeXPos.mesh.edges.at(0));
+	planes.push_back(planeZPos.mesh.edges.at(0));
 
-	planes.push_back(&planeXPos.mesh.edges.at(0));
-	planes.push_back(&planeZPos.mesh.edges.at(0));
+		//draw BOXES instead of planes !
+	planeYNeg.mesh.loadBox(20.0, 0.5, 20.0);
+	planeYNeg.pose->position = vertex3(0.0, -10.25, 0.0);
+	planeYNeg.updateTransform();
 
-	balls.push_back(sphere);
+	planeXNeg.mesh.loadBox(0.5, 20.0, 20.0);
+	planeXNeg.pose->position = vertex3(-10.25, 0.0, 0.0);
+	planeXNeg.updateTransform();
+
+	planeXPos.mesh.loadBox(0.5, 20.0, 20.0);
+	planeXPos.pose->position = vertex3(10.25, 0.0, 0.0);
+	planeXPos.updateTransform();
+
+	planeYPos.mesh.loadBox(20.0, 0.5, 20.0);
+	planeYPos.pose->position = vertex3(0.0, 10.25, 0.0);
+	planeYPos.updateTransform();
+
+	planeZPos.mesh.loadBox(20.0, 20.0, 0.5);
+	planeZPos.pose->position = vertex3(0.0, 0.0, 10.25);
+	planeZPos.updateTransform();
+
+	scene->models.push_back(&planeYNeg);
+	scene->models.push_back(&planeXNeg);
+	scene->models.push_back(&planeZPos);
+	//scene->models.push_back(&planeYPos);	//Comment to remove top to box!
+	scene->models.push_back(&planeXPos);
+
 	Renderer::init();
 }
 
@@ -135,40 +174,41 @@ Trajectory& createKeyFrames(void){
 ////================================
 void update( void ) {
 	scene->update(time, step);
-	polygon poly = planeYNeg.mesh.edges.at(0);
-	if(CollisionDetector::intersects(sphere,  planeYNeg.mesh.edges.at(0))){
-		printf("COLLISION!!\n\n\n");
-	
-		//is this all I have to do?
-		//printf("Force %f , ", sphere.force.gety());
 
-		//create an equal and opposite reaction
-		//vertex3 normalForce = poly.normal.normalize() *sphere.force  * -1.0;
-		vertex3 normalForce = poly.normal;
-		float theta = atan2(normalForce.gety(),normalForce.getx());
-		//normalForce.setx(normalForce.getx() * sphere.force.getMagnitude());
-		//normalForce.sety(normalForce.gety() * sphere.force.getMagnitude());
-		//normalForce.setz(normalForce.getz() * sphere.force.getMagnitude());
-		normalForce = normalForce * cos(theta);
-		//normalForce = normalForce * -1.0f;
-		
-
-		sphere.moveAlongOppositeDirection(time, step);
-		//sphere.moveAlongOppositeDirection(time, step);
-		//sphere.moveAlongOppositeDirection(time, step);
-		sphere.applyNormalForce(normalForce, step);
-		
-	}
-	//if(CollisionDetector::intersects(sphere, balls.at(1))){
-	//	printf("COLLISION WITH SPHERE!!\n\n\n");
-
-		//create an equal and opposite reaction for ONLY the 
-	//	vertex3 normalForce = 
-
-
+	//for debugging
+	//for(unsigned int i=0; i<numBalls; ++i){
+	//	balls.at(i)->mesh.color = vertex3(1.0, 0.0, 0.0);
 	//}
-	//here, the reference is not being updated...
-	//	printf("Force   %f\n", sphere.force.gety());
+
+	//for each wall in the scene
+	for(unsigned int i=0; i<numBalls; ++i){
+		for(unsigned int j=0; j<planes.size(); ++j){
+			polygon poly = planes.at(j);
+			if(CollisionDetector::intersects(balls.at(i), poly)){
+				//printf("COLLISION!!\n\n\n");
+				balls.at(i)->handlePolygonCollision(poly, time, step);
+			}
+		}
+	}
+
+	bool beenProcessed[numBalls];	
+	for(int i= 0; i<numBalls; i++)
+		beenProcessed[i] = false;
+	//for each ball, go through every other ball. O(n^2)
+	for(unsigned int i=0; i<numBalls; ++i){
+		for(unsigned int j=0; j<balls.size(); ++j){
+			if(i != j && !beenProcessed[i]){
+				if(CollisionDetector::intersects(balls.at(i), balls.at(j))){
+					//printf("\nBALL COLLSioN %d  %d\n", i, j);
+					//balls.at(i)->mesh.color = vertex3(0.0, 1.0, 0.0);
+					//balls.at(j)->mesh.color = vertex3(0.0, 0.0, 1.0);
+					balls.at(i)->handleRigidBodyCollision(balls.at(j), time, step);
+					beenProcessed[i] = true;
+					beenProcessed[j] = true;
+				}
+			}
+		}
+	}
 }
 
 
@@ -191,31 +231,46 @@ void render( void ){
 		// enable lighting
 		glEnable(GL_LIGHTING);
 		glEnable(GL_LIGHT0);
+		glEnable(GL_COLOR_MATERIAL);
+		//glEnable(GL_LIGHT1);
+		//glEnable(GL_LIGHT2);
 
 		// light source attributes
-		GLfloat LightAmbient[]	= { 0.6f, 0.6f, 0.6f, 1.0f };
+		GLfloat LightAmbient[]	= { 0.2f, 0.2f, 0.2f, 1.0f };
 		GLfloat LightDiffuse[]	= { 1.0f, 1.0f, 1.0f, 1.0f };
-		GLfloat LightSpecular[]	= { 0.4f, 0.4f, 0.4f, 1.0f };
-		GLfloat LightPosition[] = { 0.0f, 400.0f, 0.0f, 1.0f };
+		GLfloat LightSpecular[]	= { 1.0f, 1.0f, 1.0f, 1.0f };
+		GLfloat LightPosition0[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+		GLfloat LightPosition1[] = { 10.0f, 0.0f, 0.0f, 1.0f };
+		GLfloat LightPosition2[] = {-10.0f, 0.0f, 0.0f, 1.0f };
 
 		glLightfv(GL_LIGHT0, GL_AMBIENT , LightAmbient );
 		glLightfv(GL_LIGHT0, GL_DIFFUSE , LightDiffuse );
 		glLightfv(GL_LIGHT0, GL_SPECULAR, LightSpecular);
-		glLightfv(GL_LIGHT0, GL_POSITION, LightPosition);
+		glLightfv(GL_LIGHT0, GL_POSITION, LightPosition0);
+		
+		glLightfv( GL_LIGHT1, GL_POSITION, LightPosition1 );
+		glLightfv( GL_LIGHT1, GL_AMBIENT, LightAmbient );
+		glLightfv(GL_LIGHT1, GL_SPECULAR, LightSpecular);
+		glLightfv( GL_LIGHT1, GL_DIFFUSE, LightDiffuse );
+
+		glLightfv( GL_LIGHT2, GL_POSITION, LightPosition2 );
+		glLightfv( GL_LIGHT2, GL_AMBIENT, LightAmbient );
+		glLightfv( GL_LIGHT2, GL_DIFFUSE, LightDiffuse );
+		glLightfv(GL_LIGHT2, GL_SPECULAR, LightSpecular);
 		
 		// surface material attributes
-		GLfloat material_Ka[]	= { 0.11f, 0.06f, 0.11f, 1.0f };
-		GLfloat material_Kd[]	= { 0.43f, 0.47f, 0.54f, 1.0f };
-		GLfloat material_Ks[]	= { 0.33f, 0.33f, 0.52f, 1.0f };
-		GLfloat material_Ke[]	= { 0.1f , 0.0f , 0.1f , 1.0f };
+		GLfloat material_Ka[]	= { 0.2f, 0.2f, 0.2f, 1.0f };
+		GLfloat material_Kd[]	= { 1.0f, 1.0f, 1.0f, 1.0f  };
+		GLfloat material_Ks[]	= { 1.0f, 1.0f, 1.0f, 1.0f };
+		GLfloat material_Ke[]	= { 0.0f , 0.0f , 0.0f , 1.0f };
 		GLfloat material_Se		= 10;
 
-		
-		glMaterialfv(GL_FRONT, GL_AMBIENT	, material_Ka);
-		glMaterialfv(GL_FRONT, GL_DIFFUSE	, material_Kd);
-		glMaterialfv(GL_FRONT, GL_SPECULAR	, material_Ks);
-		glMaterialfv(GL_FRONT, GL_EMISSION	, material_Ke);
-		glMaterialf (GL_FRONT, GL_SHININESS	, material_Se);
+		//glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, material_Kd);
+		//glMaterialfv(GL_FRONT, GL_AMBIENT	, material_Ka);
+		//glMaterialfv(GL_FRONT, GL_DIFFUSE	, material_Kd);
+		//glMaterialfv(GL_FRONT, GL_SPECULAR	, material_Ks);
+		//glMaterialfv(GL_FRONT, GL_EMISSION	, material_Ke);
+		//glMaterialf (GL_FRONT, GL_SHININESS	, material_Se);
 		
 
 		//glTranslatef (0.0, 0.0, -5.0);
@@ -227,7 +282,10 @@ void render( void ){
 		glutSwapBuffers();
 
 		// disable lighting
+		glDisable(GL_COLOR_MATERIAL);
 		glDisable(GL_LIGHT0);
+		//glDisable(GL_LIGHT1);
+		//glDisable(GL_LIGHT2);
 		glDisable(GL_LIGHTING);
 }
 
@@ -251,14 +309,14 @@ void reshape( int w, int h ) {
 	// projection matrix
 	glMatrixMode( GL_PROJECTION );
 	glLoadIdentity();
-	gluPerspective(45.0, (GLfloat)w/(GLfloat)h, 0.1, 1000.0);
+	gluPerspective(45.0, (GLfloat)w/(GLfloat)h, 0.1, 200.0);
 	//glTranslatef(0.0, 0.0, -10.0);
 
 	//gluLookAt(0.0, 0.0, -10.0, 0.0, 0.0, -9.0, 0.0, 1.0, 0.0);
 	//when rotating around y, must change x and z values
 	//gluLookAt(10.0, 0.0, 0.0, 9.0, 0.0, 0.0, 0.0, 1.0, 0.0);
 	//gluLookAt(10.0, 3.0, -10.0, 4.0, 0.0, -4.0, 0.0, 1.0, 0.0);
-	gluLookAt(0.0, 3.0, -40.0, 0.0, 0.0, -8.0, 0.0, 1.0, 0.0);
+	gluLookAt(0.0, 30.0, -20.0, 0.0, -8.0, 8.0, 0.0, 1.0, 0.0);
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -353,6 +411,8 @@ int main( int argc, char** argv ){
 	return 0;
 }
 
+*/
+
 
 //white light
 /*
@@ -373,5 +433,4 @@ int main( int argc, char** argv ){
 		GLfloat material_Ks[]	= { 1.0f, 1.0f, 1.0f, 1.0f };
 		GLfloat material_Ke[]	= { 0.1f , 0.0f , 0.1f , 1.0f };
 		GLfloat material_Se		= 10;
-
 */

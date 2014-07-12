@@ -10,12 +10,11 @@
 #include "Vector4.h"
 
 #include <Eigen/Geometry>
-using namespace Eigen;
 
 class matrix4{
 public:
 	//Contains an Eigen Matrix in order to handle math.
-	Matrix4f matrix;
+	Eigen::Matrix4f matrix;
 	//Constructors
 
 	void zero(){
@@ -27,14 +26,14 @@ public:
 	}
 
 	matrix4(){
-		matrix = Matrix4f();
+		this->matrix = Eigen::Matrix4f();
 		this->zero();
 		//matrix.Zero();
 	}
 
 	matrix4(float number){
 		//does nothing with the float at all.
-		matrix = Matrix4f();
+		this->matrix = Eigen::Matrix4f();
 		this->identity();
 		//matrix.Zero();
 	}
@@ -43,6 +42,7 @@ public:
 			float aa, float bb, float cc, float dd,
 			float aaa, float bbb, float ccc, float ddd,
 			float aaaa, float bbbb, float cccc, float dddd){
+				this->matrix = Eigen::Matrix4f();
 				matrix(0, 0) = a;
 				matrix(0, 1) = b;
 				matrix(0, 2) = c;
@@ -62,7 +62,7 @@ public:
 	}
 
 	matrix4(const matrix4& mat){
-		matrix = Matrix4f(mat.matrix);
+		matrix = Eigen::Matrix4f(mat.matrix);
 	}
 
 	//Operators
@@ -112,7 +112,7 @@ public:
 	}
 
 	//other funcs
-	matrix4 transpose(){
+	matrix4 transpose() const{
 		matrix4 transpose;
 		transpose.matrix = matrix.transpose();
 		return transpose;
@@ -174,14 +174,14 @@ public:
 
 class matrix1x4 {
 	public:
-		RowVector4f matrix;
+		Eigen::RowVector4f matrix;
 
 	matrix1x4(){
-		matrix = RowVector4f();
+		matrix = Eigen::RowVector4f();
 	}
 
 	matrix1x4(const matrix1x4& mat){
-		matrix = RowVector4f(mat.matrix);
+		matrix = Eigen::RowVector4f(mat.matrix);
 	}
 /*
     // TODO: double check that this method is correct

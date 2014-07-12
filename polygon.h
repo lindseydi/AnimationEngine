@@ -14,6 +14,7 @@ public:
 	
 	PolygonType type;
 	vector<int> vertexIndices;	//how to save indices...TODO
+	vertex3 center;
 	vertex3 normal;
 	float d;	///given point on the plane
 
@@ -37,7 +38,7 @@ public:
 		//calcNorm();
 	}
 
-	polygon(int a, int b, int c, vertex3 normal){
+	polygon(int a, int b, int c, const vertex3& normal){
 		vertexIndices.push_back(a);
 		vertexIndices.push_back(b);
 		vertexIndices.push_back(c);
@@ -55,7 +56,7 @@ public:
 		//calcNorm();
 	}
 
-	polygon(int a, int b, int c, int d, vertex3 normal){
+	polygon(int a, int b, int c, int d, const vertex3& normal){
 		vertexIndices.push_back(a);
 		vertexIndices.push_back(b);
 		vertexIndices.push_back(c);
@@ -65,7 +66,7 @@ public:
 		//calcNorm();
 	}
 
-	polygon(int a, int b, int c, int d, vertex3 normal, float dVal){
+	polygon(int a, int b, int c, int d, const vertex3& normal, float dVal){
 		vertexIndices.push_back(a);
 		vertexIndices.push_back(b);
 		vertexIndices.push_back(c);
@@ -76,7 +77,7 @@ public:
 		//calcNorm();
 	}
 
-	void operator=(polygon& poly){
+	void operator=(const polygon& poly){
 		this->d = poly.d;
 		this->normal = poly.normal;
 		this->type = poly.type;
@@ -88,7 +89,7 @@ public:
 		return type;
 	}
 
-	void setNormal(vertex3 normal){
+	void setNormal(const vertex3& normal){
 		this->normal = normal;
 		getType();
 	}
@@ -106,7 +107,7 @@ public:
 		normal = normal * -1.0;
 	}
 
-	void calculateD(vertex3 anyPoint){
+	void calculateD(const vertex3& anyPoint){
 		d = normal.dotProduct(anyPoint);
 	}
 
@@ -126,6 +127,15 @@ public:
 
 	void addVertex(int index){
 		vertexIndices.push_back(index);
+	}
+
+	vertex3 getCenter(){
+		if(type == triangle){
+			return vertex3();
+		}
+		else if(type == quad){
+			
+		}
 	}
 
 	public:

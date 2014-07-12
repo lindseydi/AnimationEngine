@@ -18,9 +18,9 @@ public:
 		path = new Trajectory();
 	}
 
-	Actor(ModelView model){
+	Actor(const ModelView& model){
 		//This is the joint that the actor is to start in world space
-		this->model = model;
+		this->model = ModelView(model);
 		path = new Trajectory();
 	}
 

@@ -178,7 +178,8 @@ void render( void ){
 		glEnable(GL_LIGHT0);
 
 		// light source attributes
-		GLfloat LightAmbient[]	= { 1.0f, 1.0f, 1.0f, 1.0f };
+		GLfloat Light
+		ent[]	= { 1.0f, 1.0f, 1.0f, 1.0f };
 		GLfloat LightDiffuse[]	= { 1.0f, 1.0f, 1.0f, 1.0f };
 		GLfloat LightSpecular[]	= { 1.0f, 1.0f, 1.0f, 1.0f };
 		GLfloat LightPosition[] = { 0.0f, 10.0f, 0.0f, 1.0f };

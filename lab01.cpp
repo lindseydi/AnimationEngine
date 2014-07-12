@@ -1,7 +1,11 @@
-/*
 
 #pragma once
 #include <stdlib.h>
+
+// glew
+#include <glew.h>
+
+
 #include "Pose.h"
 // standard
 #include <assert.h>
@@ -50,6 +54,14 @@ GLfloat PofU[7];
 // init
 //================================
 void init(void) {
+	GLenum err = glewInit();
+	if (GLEW_OK != err)
+	{
+	 //Problem: glewInit failed, something is seriously wrong.
+	  fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
+	}
+	fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
+
 	// init something before main loop...
 	glClearColor(1.0, 1.0, 1.0, 0.0);
 
@@ -61,6 +73,8 @@ void init(void) {
 	//Actor* actor = new Actor(ModelView("resources/knight.txt"));
 	Actor* actor = new Actor(box);
 	scene->actors.push_back(actor);
+
+	Renderer::init();
 }
 
 Trajectory& createKeyFrames(void){
@@ -274,4 +288,3 @@ int main( int argc, char** argv ){
 
 	return 0;
 }
-*/

@@ -25,7 +25,7 @@ class Joint{
 	Joint(const Pose& localPose);
 
 	void addLink(Link* child);
-	void translate(vertex3 movement);
+	void translate(const vertex3& movement);
 	void rotate();
 	void addPointOnPath(PoseKey* controlPoint);
 

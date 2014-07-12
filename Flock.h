@@ -4,6 +4,7 @@
 #include "Actor.h"
 
 class BoidActor{
+
 public:
 	BoidActor(){
 		model = ModelView();
@@ -16,8 +17,9 @@ public:
 	BoidActor(float posx, float posy, float posz){
 		model = ModelView();
 		velocity = vertex3(0.01f, 0.01f, 0.01f);	//what do I set this to?
+		pose = Pose();
 		pose.position.set(posx, posy, posz);
-		motivationPosition.set(-5.0, 5.0, 0.0);
+		motivationPosition = vertex3(-5.0, 5.0, 0.0);
 		base = 0.3;
 		height = 0.4;
 		model.loadPyramid(base, height);
@@ -26,8 +28,9 @@ public:
 	BoidActor(float posx, float posy, float posz, float base, float height){
 		model = ModelView();
 		velocity = vertex3(0.1f, 0.1f, 0.1f);
+		pose = Pose();
 		pose.position.set(posx, posy, posz);
-		motivationPosition.set(0.0, 0.0, 5.0);
+		motivationPosition = vertex3(0.0, 0.0, 5.0);
 		base = 0.3;
 		height = 0.4;
 		model.loadPyramid(base, height);
@@ -122,7 +125,7 @@ public:
 		return vertex3(futureX, futureY, futureZ);
 	}
 
-	float getRadius(){
+	float getRadius() const {
 		return sqrt((base/2 * base/2) + (height/2 * height/2));
 	}
 
@@ -184,7 +187,7 @@ public:
 	}
 
 	Pose& getPose(){
-		return (this->pose);
+		return this->pose;
 	}
 
 	ModelView& getModel(){

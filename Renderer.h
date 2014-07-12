@@ -4,6 +4,7 @@
 
 #include "ModelView.h"
 #include "Pose.h"
+#include "RigidBody.h"
 #include "Link.h"
 #include "Joint.h"
 #include "Flock.h"
@@ -30,7 +31,7 @@ public:
 		glShadeModel(GL_SMOOTH); //Enable smooth shading
 	}
 
-	static void draw(vertex3 point){
+	static void draw(const vertex3& point){
 		glPointSize( 4 );
 		glBegin(GL_POINTS);
 			glColor3f( 1, 0, 0 );	//RED
@@ -46,7 +47,7 @@ public:
 		glEnd();
 	}
 
-	static void draw(vertex3 vector_0, vertex3 vector_1){
+	static void draw(const vertex3& vector_0, const vertex3& vector_1){
 		glPointSize( 4 );
 		glBegin(GL_LINES);
 			glColor3f( 1, 0, 0 );	//RED
@@ -71,9 +72,23 @@ public:
 		glEnd();
 	}
 
-	static void draw(ModelView model){
+	static void draw(const RigidBody& rigidBody){
+		//glColorMaterial(GL_FRONT, GL_DIFFUSE);
+		//glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+		glEnable(GL_COLOR_MATERIAL); //Enable color
+		glColor3f((GLfloat)rigidBody.color.getx(), (GLfloat)rigidBody.color.gety(), (GLfloat)rigidBody.color.getz());
+		glUseProgram( shader );
+			glutSolidSphere(10, 10, 4);
+		glUseProgram( 0 );
+	}
+
+	static void draw(const ModelView& model){
 		//draw all of the polygons
 		//glutSolidTeapot(0.3);
+		//glColorMaterial(GL_FRONT, GL_DIFFUSE);
+		//glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+		glEnable(GL_COLOR_MATERIAL); //Enable color
+		//glColor3f((GLfloat)model.color.getx(), (GLfloat)model.color.gety(), (GLfloat)model.color.getz());
 		glUseProgram( shader );
 		 for (unsigned int i=0 ; i < model.edges.size(); i++){
 			 polygon poly = model.edges.at(i);
@@ -82,36 +97,42 @@ public:
 					glBegin (GL_TRIANGLES);
 					glNormal3f((GLfloat)poly.normal.getx(), (GLfloat)poly.normal.gety(), (GLfloat)poly.normal.getz());		//shouldn't I only have to do this once? TODO, not if shader
 					for(unsigned int i=0; i< 3; i++){
+						glColor3f((GLfloat)model.color.getx(), (GLfloat)model.color.gety(), (GLfloat)model.color.getz());
 						int index = poly.vertexIndices.at(i);
 						GLfloat x = (GLfloat)model.vertices.at(index).getx();
 						GLfloat y = (GLfloat)model.vertices.at(index).gety();
 						GLfloat z = (GLfloat)model.vertices.at(index).getz();
+						vertex3 normal= model.normals.at(index);
+						glNormal3f(normal.getx(), normal.gety(), normal.getz());
 						glVertex3f(x, y, z);
 					}
 					glEnd();
 				break;
 				case quad:
 					glBegin (GL_QUADS);
-					glColor3f( 0.0, 0.0, 1.0 );
-					glNormal3f((GLfloat)poly.normal.getx(), (GLfloat)poly.normal.gety(), (GLfloat)poly.normal.getz());	
+					//glNormal3f((GLfloat)poly.normal.getx(), (GLfloat)poly.normal.gety(), (GLfloat)poly.normal.getz());	
 					for(unsigned int i=0; i< 4; i++){
+						glColor3f((GLfloat)model.color.getx(), (GLfloat)model.color.gety(), (GLfloat)model.color.getz());
 						int index = poly.vertexIndices.at(i);
 						GLfloat x = (GLfloat)model.vertices.at(index).getx();
 						GLfloat y = (GLfloat)model.vertices.at(index).gety();
 						GLfloat z = (GLfloat)model.vertices.at(index).getz();
+						vertex3 normal= model.normals.at(index);
+						glNormal3f(normal.getx(), normal.gety(), normal.getz());
 						glVertex3f(x, y, z);
 					}
 					glEnd();
 				break;
 			}
+      	   //glDisable(GL_COLOR_MATERIAL); //Disable color
 			glUseProgram( 0 );
 			//To draw vertex normals
 			//For debugging purposes
-			#if 1
+			#if 0
 				glBegin (GL_LINES);
 				glLineWidth(2.0);
 				for (int index=0; index < model.vertices.size(); ++index){
-					glColor3f( 1.0, 0.0, 0.0 );
+					glColor3f( 1.0, 1.0, 0.0 );
 					GLfloat x = (GLfloat)model.vertices.at(index).getx();
 					GLfloat y = (GLfloat)model.vertices.at(index).gety();
 					GLfloat z = (GLfloat)model.vertices.at(index).getz();
@@ -133,9 +154,6 @@ public:
 		Pose inbetween = actor->update();
 		draw(&inbetween, &actor->model);
 
-		glDisable(GL_LIGHT0);
-		glDisable(GL_LIGHTING);
-
 		//draws dot where teapot is supposed to be
 		//draw(inbetween.position);
 	}
@@ -148,8 +166,6 @@ public:
 			//draw(&flock->boids.at(i)->getPose());
 		}
 		
-		glDisable(GL_LIGHT0);
-		glDisable(GL_LIGHTING);
 	}
 
 	static void draw(Pose* pose, ModelView* model){
@@ -192,7 +208,7 @@ public:
 
 	static void draw(Scene* scene){
 		//create a frame of reference
-		drawReferenceLines();
+		//drawReferenceLines();
 
 		for(unsigned int i=0; i<scene->actors.size(); i++){
 			draw(scene->actors.at(i));
@@ -255,7 +271,15 @@ public:
 			matrix4 temp = model.transform;
 			//cout << "The matrix transform is:" << endl << temp.matrix << endl;
 			applyTransformation(temp);
-			draw(model.mesh);
+			if(model.type == 0){
+				glColor3f(model.mesh.color.getx(), model.mesh.color.gety(), model.mesh.color.getz());
+				draw(model.mesh);
+			}else if(model.type == 1){
+				glColor3f(model.mesh.color.getx(), model.mesh.color.gety(), model.mesh.color.getz());
+				glutSolidSphere(1.0, 10, 10);
+			}else if(model.type == 2){
+				glutSolidTeapot(1.0);
+			}
 		glPopMatrix();
 	}
 
@@ -288,7 +312,7 @@ public:
 
 
 
-	static void applyTransformation(matrix4& mat){
+	static void applyTransformation(const matrix4& mat){
 		float m[16];
 		matrix4 mat_transpose = mat.transpose();
 		mat_transpose.ToArray(m);

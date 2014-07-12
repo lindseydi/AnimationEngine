@@ -7,33 +7,60 @@
 #include "matrix4.h"
 #include "Pose.h"
 
+enum EtypeModel{emesh, esphere, ePlane, eteapot};
+
 class Model{
 public:
 	Model(){
 		//NEVER USE ME
 		mesh = ModelView();
+		type = emesh;
 		pose = NULL;
 	}
 
 	Model(Pose* pose){
+		type = emesh;
 		mesh.loadBox(1.0, 1.0, 1.0);
 		this->pose = pose;
 		this->transform = this->pose->getRotation() * this->pose->translate_object();
 	}
 
-	Model(ModelView mesh, Pose* pose){
+	Model(Pose* pose, vertex3 color){
+		type = emesh;
+		mesh.loadBox(1.0, 1.0, 1.0);
+		this->pose = pose;
+		mesh.color = color;
+		this->transform = this->pose->getRotation() * this->pose->translate_object();
+	}
+
+	Model(const ModelView& mesh, Pose* pose){
+		type = emesh;
 		this->mesh = mesh;
+		this->pose = pose;
+		this->transform = this->pose->getRotation() * this->pose->translate_object();
+	}
+	
+	Model(const ModelView& mesh, Pose* pose, const vertex3& color){
+		type = emesh;
+		this->mesh = mesh;
+		this->mesh.color = color;
 		this->pose = pose;
 		this->transform = this->pose->getRotation() * this->pose->translate_object();
 	}
 
 	Model(const Model& modelCopy){
+		type = emesh;
 		this->mesh = modelCopy.mesh;
 		this->pose = modelCopy.pose;
 	}
 
 	vertex3 getEulerRepresentation(){
 		pose->getEulerRepresentation();
+	}
+
+	void updateTransform(){
+		//pose = in;
+		this->transform = this->pose->getRotation() * this->pose->translate_object();
 	}
 
 	virtual void update(){
@@ -46,6 +73,7 @@ public:
 
 
 	public:
+		EtypeModel type;
 		ModelView mesh;
 		Pose* pose;
 		matrix4 transform;

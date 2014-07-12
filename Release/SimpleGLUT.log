@@ -1,0 +1,72 @@
+﻿Build started 6/26/2014 9:10:30 PM.
+     1>Project "C:\Users\Lindsey\Documents\Visual Studio 2012\Projects\hierarchy\SimpleGLUT.vcxproj" on node 2 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /O2 /Ob1 /Oy- /D WIN32 /D NDEBUG /D _CONSOLE /D _VC80_UPGRADE=0x0600 /D _MBCS /GF /Gm- /EHsc /MT /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Yc"stdafx.h" /Fp".\Release/SimpleGLUT.pch" /Fo".\Release/" /Fd".\Release/vc110.pdb" /Gd /TP /analyze- /errorReport:prompt StdAfx.cpp
+         StdAfx.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /O2 /Ob1 /Oy- /D WIN32 /D NDEBUG /D _CONSOLE /D _VC80_UPGRADE=0x0600 /D _MBCS /GF /Gm- /EHsc /MT /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Yu"stdafx.h" /Fp".\Release/SimpleGLUT.pch" /Fo".\Release/" /Fd".\Release/vc110.pdb" /Gd /TP /analyze- /errorReport:prompt Joint.cpp lab02.cpp lab03.cpp lab04.cpp lab05.cpp lab01.cpp Link.cpp
+         Joint.cpp
+     1>Joint.cpp(1): warning C4627: '#include "Link.h"': skipped when looking for precompiled header use
+                 Add directive to 'stdafx.h' or rebuild precompiled header
+     1>Joint.cpp(2): warning C4627: '#include "Joint.h"': skipped when looking for precompiled header use
+                 Add directive to 'stdafx.h' or rebuild precompiled header
+     1>Joint.cpp(75): fatal error C1010: unexpected end of file while looking for precompiled header. Did you forget to add '#include "stdafx.h"' to your source?
+         lab02.cpp
+     1>lab02.cpp(310): fatal error C1010: unexpected end of file while looking for precompiled header. Did you forget to add '#include "stdafx.h"' to your source?
+         lab03.cpp
+     1>lab03.cpp(2): warning C4627: '#include <stdlib.h>': skipped when looking for precompiled header use
+                 Add directive to 'stdafx.h' or rebuild precompiled header
+     1>lab03.cpp(5): warning C4627: '#include <glew.h>': skipped when looking for precompiled header use
+                 Add directive to 'stdafx.h' or rebuild precompiled header
+     1>lab03.cpp(7): warning C4627: '#include "Pose.h"': skipped when looking for precompiled header use
+                 Add directive to 'stdafx.h' or rebuild precompiled header
+     1>lab03.cpp(9): warning C4627: '#include <assert.h>': skipped when looking for precompiled header use
+                 Add directive to 'stdafx.h' or rebuild precompiled header
+     1>lab03.cpp(10): warning C4627: '#include <math.h>': skipped when looking for precompiled header use
+                 Add directive to 'stdafx.h' or rebuild precompiled header
+     1>lab03.cpp(13): warning C4627: '#include <sys/stat.h>': skipped when looking for precompiled header use
+                 Add directive to 'stdafx.h' or rebuild precompiled header
+     1>lab03.cpp(17): warning C4627: '#include "polygon.h"': skipped when looking for precompiled header use
+                 Add directive to 'stdafx.h' or rebuild precompiled header
+     1>lab03.cpp(19): warning C4627: '#include "Renderer.h"': skipped when looking for precompiled header use
+                 Add directive to 'stdafx.h' or rebuild precompiled header
+     1>lab03.cpp(20): warning C4627: '#include "matrix3.h"': skipped when looking for precompiled header use
+                 Add directive to 'stdafx.h' or rebuild precompiled header
+     1>lab03.cpp(21): warning C4627: '#include "matrix4.h"': skipped when looking for precompiled header use
+                 Add directive to 'stdafx.h' or rebuild precompiled header
+     1>lab03.cpp(22): warning C4627: '#include "Trajectory.h"': skipped when looking for precompiled header use
+                 Add directive to 'stdafx.h' or rebuild precompiled header
+     1>lab03.cpp(23): warning C4627: '#include "Scene.h"': skipped when looking for precompiled header use
+                 Add directive to 'stdafx.h' or rebuild precompiled header
+     1>lab03.cpp(24): warning C4627: '#include "Modelview.h"': skipped when looking for precompiled header use
+                 Add directive to 'stdafx.h' or rebuild precompiled header
+     1>lab03.cpp(25): warning C4627: '#include "RigidBody.h"': skipped when looking for precompiled header use
+                 Add directive to 'stdafx.h' or rebuild precompiled header
+     1>lab03.cpp(26): warning C4627: '#include "CollisionDetector.h"': skipped when looking for precompiled header use
+                 Add directive to 'stdafx.h' or rebuild precompiled header
+     1>lab03.cpp(28): warning C4627: '#include <iostream>': skipped when looking for precompiled header use
+                 Add directive to 'stdafx.h' or rebuild precompiled header
+     1>lab03.cpp(29): warning C4627: '#include <vector>': skipped when looking for precompiled header use
+                 Add directive to 'stdafx.h' or rebuild precompiled header
+     1>lab03.cpp(31): warning C4627: '#include <GL/glut.h>': skipped when looking for precompiled header use
+                 Add directive to 'stdafx.h' or rebuild precompiled header
+     1>lab03.cpp(32): warning C4627: '#include <GL/glu.h>': skipped when looking for precompiled header use
+                 Add directive to 'stdafx.h' or rebuild precompiled header
+     1>lab03.cpp(384): fatal error C1010: unexpected end of file while looking for precompiled header. Did you forget to add '#include "stdafx.h"' to your source?
+         lab04.cpp
+     1>lab04.cpp(218): fatal error C1010: unexpected end of file while looking for precompiled header. Did you forget to add '#include "stdafx.h"' to your source?
+         lab05.cpp
+     1>lab05.cpp(1): fatal error C1010: unexpected end of file while looking for precompiled header. Did you forget to add '#include "stdafx.h"' to your source?
+         lab01.cpp
+     1>lab01.cpp(278): fatal error C1010: unexpected end of file while looking for precompiled header. Did you forget to add '#include "stdafx.h"' to your source?
+         Link.cpp
+     1>Link.cpp(1): warning C4627: '#include "Link.h"': skipped when looking for precompiled header use
+                 Add directive to 'stdafx.h' or rebuild precompiled header
+     1>Link.cpp(2): warning C4627: '#include "Joint.h"': skipped when looking for precompiled header use
+                 Add directive to 'stdafx.h' or rebuild precompiled header
+     1>Link.cpp(119): fatal error C1010: unexpected end of file while looking for precompiled header. Did you forget to add '#include "stdafx.h"' to your source?
+         Generating Code...
+     1>Done Building Project "C:\Users\Lindsey\Documents\Visual Studio 2012\Projects\hierarchy\SimpleGLUT.vcxproj" (Build target(s)) -- FAILED.
+
+Build FAILED.
+
+Time Elapsed 00:00:01.77

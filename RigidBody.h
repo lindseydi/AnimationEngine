@@ -7,6 +7,8 @@
 
 
 class RigidBody: public Model{
+	enum ERigidBodyColor{red, green, purple, pink, yellow, white, orange, black};
+	vector<vertex3> rbColors;
 		public:
 		//void generateI_object(){
 		//	matrix3 identity = matrix3();
@@ -30,7 +32,27 @@ class RigidBody: public Model{
 		//double angularMomentum;		//angular momentum
 		vertex3 force;	//force
 		//vertex3 torque;	//Torque
-		vertex3 color;
+	
+		vertex3 getColor(ERigidBodyColor color){
+			switch (color){
+				case(red):
+					return vertex3(1.0, 0.0, 0.0);
+				case(green):
+					return vertex3(0.0, 1.0, 0.0);
+				case(purple):
+					return vertex3(1.0, 0.0, 1.0);
+				case(pink):
+					return vertex3(0.0, 1.0, 1.0);
+				case(yellow):
+					return vertex3(1.0, 1.0, 0.0);
+				case(orange):
+					return vertex3(1.0, 0.5, 0.0);
+				case(white):
+					return vertex3(1.0, 1.0, 1.0);
+				case(black):
+					return vertex3(0.0, 0.0, 0.0);
+			}
+		}
 
 		RigidBody(): Model(){
 			radius = 1.0;
@@ -48,6 +70,8 @@ class RigidBody: public Model{
 			force = vertex3();
 			//torque= vertex3();
 			//generateI_object();
+			ERigidBodyColor rgColor = (ERigidBodyColor)Helper::randBetween_int(0, 8);
+			mesh.color = getColor(rgColor);
 		}
 
 		RigidBody(Pose* initialLocation): Model(){
@@ -69,13 +93,14 @@ class RigidBody: public Model{
 			force = vertex3();
 			//torque = vertex3();
 			//generateI_object();
+			ERigidBodyColor rgColor = (ERigidBodyColor)Helper::randBetween_int(0, 8);
+			mesh.color = getColor(rgColor);
 		}
 
 		RigidBody(const RigidBody& copy){
 			//this->angularAcceleration = copy.angularAcceleration;
 			//this->angularMomentum = copy.angularMomentum;
 			//this->angularVelocity = copy.angularVelocity;
-			this->color = copy.color;
 			this->force =copy.force;
 			//this->I = copy.I;
 			//this->I_object = copy.I_object;

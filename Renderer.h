@@ -34,25 +34,25 @@ public:
 	static void draw(const vertex3& point){
 		glPointSize( 4 );
 		glBegin(GL_POINTS);
-			glColor3f( 1, 0, 0 );	//RED
-			glVertex3f((GLfloat)point.getx(), (GLfloat)point.gety(), (GLfloat)point.gety());
+			//glColor3f( 1, 0, 0 );	//RED
+			glVertex3f((GLfloat)point.getx(), (GLfloat)point.gety(), (GLfloat)point.getz());
 		glEnd();
 	}
 
 	static void draw(vertex3* point){
-		glPointSize( 4 );
+		//glPointSize( 4 );
 		glBegin(GL_POINTS);
-			glColor3f( 1, 0, 0 );	//RED
-			glVertex3f((GLfloat)point->getx(), (GLfloat)point->gety(), (GLfloat)point->gety());
+			//glColor3f( 1.0, 0.0, 1.0 );	//RED
+			glVertex3f((GLfloat)point->getx(), (GLfloat)point->gety(), (GLfloat)point->getz());
 		glEnd();
 	}
 
 	static void draw(const vertex3& vector_0, const vertex3& vector_1){
-		glPointSize( 4 );
+		//glPointSize( 4 );
 		glBegin(GL_LINES);
-			glColor3f( 1, 0, 0 );	//RED
-			glVertex3f((GLfloat)vector_0.getx(), (GLfloat)vector_0.gety(), (GLfloat)vector_0.gety());
-			glVertex3f((GLfloat)vector_1.getx(), (GLfloat)vector_1.gety(), (GLfloat)vector_1.gety());
+			//glColor3f( 1, 0, 0 );	//RED
+			glVertex3f((GLfloat)vector_0.getx(), (GLfloat)vector_0.gety(), (GLfloat)vector_0.getz());
+			glVertex3f((GLfloat)vector_1.getx(), (GLfloat)vector_1.gety(), (GLfloat)vector_1.getz());
 		glEnd();
 	}
 
@@ -60,23 +60,39 @@ public:
 		vector<vertex3*>::iterator it;
 
 		//Draw path by drawing interpolated positions
-		glPointSize( 4 );
-		glBegin(GL_POINTS);
+		//glPointSize( 4 );
+		//glBegin(GL_POINTS);
 		for (it = path->pointsAlongPath.begin(); it != path->pointsAlongPath.end(); it++){
 			//draw(*it);
 			//draws the dots
-			glColor3f( 1, 0, 0 );	//RED
+			glPointSize(4);
+			glColor3f( 1.0, 0.0, 1.0 );	//purple
 			//printf("Dot is %f, %f, %f\n", (*it)->getx(),(*it)->gety(), (*it)->gety());
-			glVertex3f((GLfloat)(*it)->getx(), (GLfloat)(*it)->gety(), (GLfloat)(*it)->gety());
+			//glVertex3f((GLfloat)(*it)->getx(), (GLfloat)(*it)->gety(), (GLfloat)(*it)->gety());
+			//vertex3 vertex = vertex3((GLfloat)(*it)->getx(), (GLfloat)(*it)->gety(), (GLfloat)(*it)->getz());
+			Renderer::draw(*it);
 		}
-		glEnd();
+		vector<PoseKey*>::iterator it2;
+		//draw control Points in a different color
+		Model box = Model();
+		box.mesh.loadBox(0.1, 0.1, 0.1);
+		box.mesh.color = vertex3(0.0, 1.0, 0.0);
+		for (it2 = path->controlPoints.begin(); it2 != path->controlPoints.end(); it2++){
+		
+			//Renderer::draw((*it2)->position);
+			box.pose = &Pose((*it2)->position.getx(), (*it2)->position.gety(), (*it2)->position.getz(), 0.0, 0.0, 0.0);
+			box.updateTransform();
+			draw(box);
+		}
+
+		//glEnd();
 	}
 
 	static void draw(const RigidBody& rigidBody){
 		//glColorMaterial(GL_FRONT, GL_DIFFUSE);
 		//glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
 		glEnable(GL_COLOR_MATERIAL); //Enable color
-		glColor3f((GLfloat)rigidBody.color.getx(), (GLfloat)rigidBody.color.gety(), (GLfloat)rigidBody.color.getz());
+		glColor3f((GLfloat)rigidBody.mesh.color.getx(), (GLfloat)rigidBody.mesh.color.gety(), (GLfloat)rigidBody.mesh.color.getz());
 		glUseProgram( shader );
 			glutSolidSphere(10, 10, 4);
 		glUseProgram( 0 );
@@ -149,7 +165,7 @@ public:
 	}
 
 	static void draw(Actor* actor){
-		//draw(actor->path);		//pointer?
+		draw(actor->path);		//pointer?
 
 		Pose inbetween = actor->update();
 		draw(&inbetween, &actor->model);
@@ -160,12 +176,15 @@ public:
 
 	static void draw(Flock* flock){
 		//printf("Flock render being executed");
-		flock->update();
-		for(unsigned int i=0; i<flock->boids.size(); i++){
-			draw(&flock->boids.at(i)->getPose(), &flock->boids.at(i)->getModel());
+		glPushMatrix();
+		for(unsigned int i=0; i<flock->boids.size(); ++i){
+			//flock->boids.at(i)->updateTransformEuler();
+			Renderer::draw(flock->boids.at(i));
 			//draw(&flock->boids.at(i)->getPose());
 		}
-		
+		glColor3f(0.0, 1.0, 0.0);
+		draw(flock->motivationPosition);		
+		glPopMatrix();
 	}
 
 	static void draw(Pose* pose, ModelView* model){
@@ -200,9 +219,9 @@ public:
 
 	static void drawReferenceLines() {
     	glPushMatrix();
-		draw(vertex3(), vertex3(2.0f, 0.0f, 0.0f));
-		draw(vertex3(), vertex3(0.0f, 2.0f, 0.0f));
-		draw(vertex3(), vertex3(0.0f, 0.0f, 2.0f));
+			draw(vertex3(), vertex3(2.0f, 0.0f, 0.0f));
+			draw(vertex3(), vertex3(0.0f, 2.0f, 0.0f));
+			draw(vertex3(), vertex3(0.0f, 0.0f, 2.0f));
 		glPopMatrix();		
 	}
 
@@ -263,6 +282,29 @@ public:
 				draw(temp);
 			}
 		}
+	}
+
+
+	static void draw(BoidModel* model){
+		//draw(model->pose, model->mesh);
+		glPushMatrix();
+			matrix4 temp = model->transform;
+			//cout << "The matrix transform is:" << endl << temp.matrix << endl;
+			applyTransformation(temp);
+			//glTranslatef(model->pose->position.getx(), model->pose->position.gety(), model->pose->position.getz());
+			//glRotatef(model->pose->orientation->getz()*180.0/PI, 0.0,0.0, 1.0);
+			if(model->type == 0){
+				glColor3f(model->mesh.color.getx(), model->mesh.color.gety(), model->mesh.color.getz());
+				//printf("Draw (%f, %f) %f\n", model->pose->position.getx(),model->pose->position.gety(), model->pose->orientation->getz());
+				draw(model->mesh);
+			}else if(model->type == 1){
+				glColor3f(model->mesh.color.getx(), model->mesh.color.gety(), model->mesh.color.getz());
+				glutSolidSphere(1.0, 10, 10);
+			}else if(model->type == 2){
+				glutSolidTeapot(1.0);
+			}
+			//glutSolidTeapot(0.3);
+		glPopMatrix();
 	}
 
 	static void draw(const Model& model){

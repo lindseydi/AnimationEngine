@@ -58,9 +58,18 @@ public:
 		pose->getEulerRepresentation();
 	}
 
+	void updateTransformEuler(){
+		//pose = in;
+		this->transform = this->pose->translate_object() * this->pose->getEulerRotation();
+		//printf("Pose (%f, %f) %f\n", this->pose->position.getx(),this->pose->position.gety(), this->pose->orientation->getz());
+
+	}
+
 	void updateTransform(){
 		//pose = in;
-		this->transform = this->pose->getRotation() * this->pose->translate_object();
+		this->transform = this->pose->translate_object()* this->pose->getRotation();
+		//printf("Pose (%f, %f) %f\n", this->pose->position.getx(),this->pose->position.gety(), this->pose->orientation->getz());
+
 	}
 
 	virtual void update(){

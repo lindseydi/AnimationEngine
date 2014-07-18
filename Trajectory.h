@@ -11,13 +11,13 @@
 #include "Vector4.h"
 #include <Eigen/Geometry>
 
-class Trajectory{
-	public:
 	enum cubicSpline{catmullRom, bSpline};
 	enum Cycle{circle, pendulum, clamp};
 	
+class Trajectory{
 	private:
 		Eigen::MatrixXf M;
+		int multiplier;
 		int startFrame;
 		int endFrame;
 		int u;
@@ -27,13 +27,14 @@ class Trajectory{
 		float PofU[7];
 
 		void generateControlPoints(){
-			controlPoints.push_back(new PoseKey(-1.5,	0.0,	0.0,	0.0,	10.0,	0.0,	 0));
-			controlPoints.push_back(new PoseKey(-1.0,	0.0,	0.0,	0.0,	0.0,	0.0,	30));
-			controlPoints.push_back(new PoseKey(-0.5,	0.0,	-2.5,	0.0,	0.0,	0.0,	60));
-			controlPoints.push_back(new PoseKey(0.0,	0.0,	0.0,	0.0,	45.0,	0.0,	90));
-			controlPoints.push_back(new PoseKey(0.5,	0.0,	0.0,	0.0,	0.0,	0.0,	120));
-			controlPoints.push_back(new PoseKey(1.0,	0.0,	0.0,	0.0,	0.0,	0.0,	150));
-			controlPoints.push_back(new PoseKey(1.5,	0.0,	2.0,	0.0,	0.0,	0.0,	180));
+			controlPoints.push_back(new PoseKey(-1.5,	0.0,	2.0,	0.0,	10.0,	0.0,	 0));
+			controlPoints.push_back(new PoseKey(-1.0,	1.0,	1.0,	0.0,	0.0,	0.0,	30));
+			controlPoints.push_back(new PoseKey(-0.5,	1.0,	0.5,	0.0,	0.0,	0.0,	60));
+			controlPoints.push_back(new PoseKey(0.0,	0.0,	-1.5,	0.0,	45.0,	0.0,	90));
+			controlPoints.push_back(new PoseKey(0.5,	0.0,	-1.5,	0.0,	0.0,	45.0,	120));
+			controlPoints.push_back(new PoseKey(1.0,	0.0,	-.5,	0.0,	0.0,	45.0,	150));
+			//controlPoints.push_back(new PoseKey(1.5,	0.0,	1.0,	0.0,	0.0,	45.0,	180));
+			controlPoints.push_back(new PoseKey(1.5,	0.0,	1.0,	0.0,	0.0,	45.0,	250));
 
 		}
 
@@ -57,6 +58,7 @@ class Trajectory{
 				M(1,0) =  3.0; M(1, 1) = -6.0; M(1, 2) = 3.0; M(1,3) = 0.0;
 				M(2,0) =  -3.0; M(2, 1) = 0.0; M(2, 2) = 3.0; M(2,3) = 0.0;
 				M(3,0) =  1.0; M(3, 1) = 4.0; M(3, 2) = 1.0; M(3,3) = 0.0;
+				M = M * 1.0/6.0;
 			}
 		}
 
@@ -85,6 +87,7 @@ class Trajectory{
 			endFrame = controlPoints.at(1)->frame;
 			startFrame = controlPoints.at(0)->frame;
 			setSplineType();
+			multiplier = 0;
 		}
 
 		Trajectory(){
@@ -116,6 +119,20 @@ class Trajectory{
 			init();
 		}
 
+		Trajectory(cubicSpline spline, Cycle cycle){
+			this->cycleType = cycle;
+			generateControlPoints();
+			splineType = spline;
+			init();
+		}
+		
+		Trajectory(Cycle cycleType){
+			this->cycleType = cycleType;
+			generateControlPoints();
+			splineType = catmullRom;
+			init();
+		}
+
 		~Trajectory(){
 			while(!controlPoints.empty()) delete controlPoints.back(), controlPoints.pop_back();
 			while(!pointsAlongPath.empty()) delete pointsAlongPath.back(), pointsAlongPath.pop_back();
@@ -128,49 +145,21 @@ class Trajectory{
 				return false;
 		}
 		
-		virtual Pose& update(){
-			//If finished interpolating between current start and end Control Points
-			//Move onto next one.
-			//Also check that we have not reached the end of our list to avoid
-			//out of bounds exceptions
-			if(forward)
-				u++;			
-			else
-				u--;	//Should never be negative
-			int k0, k1, k2, k3;
-			k0 = k1 = k2 = k3 = 0;
-			//implies forward because u is >
-			if(cycleType!= circle && (u >= endFrame) && forward && cpIndex < (controlPoints.size() - 1)){
-				startFrame = endFrame;
-				cpIndex++;
-				endFrame = controlPoints.at(clampIndex(cpIndex))->frame;
-				u = startFrame;
-			}else if((u <= endFrame) && !forward && cpIndex > 0){
-				//Should only reach this point if moving backwards aka !forward
-				startFrame = endFrame;
-				cpIndex--;
-				endFrame = controlPoints.at(clampIndex(cpIndex))->frame;
-				u = startFrame;
-			}else if((u >= endFrame) && forward){
-				//do not have to check index, because it will be modded to stay safe
-				startFrame = controlPoints.at(clampIndex(cpIndex))->frame;
-				cpIndex++;
-				endFrame = controlPoints.at(clampIndex(cpIndex))->frame;
-				u = startFrame;
-			}	
+		void determineIndices(int &k0, int &k1, int &k2, int &k3){
 			//circle, pendulum, clamp
 			switch(cycleType){
 				case circle:{
 					printf("CpIndex = %d ----- u = %d ----- startFrame = %d -------- endFrame = %d \n", cpIndex, u, startFrame, endFrame);
 					//Must use brackets because we define a variable for scope reasons
-					int size = controlPoints.size()-1;
-					cpIndex = cpIndex % size;
-					k0 = (cpIndex-1) % size;	//clampIndex should do nothing
+					int size = controlPoints.size();
+					//cpIndex = cpIndex % size;
+					if(cpIndex == 0)
+						k0 = size-1;
+					else
+						k0 = (cpIndex-1) % size;	//clampIndex should do nothing
 					k1 = cpIndex;	//clampIndex should do nothing for all
 					k2 = (cpIndex+1) % size;
 					k3 = (cpIndex+2) % size;
-					if(k2 == size)
-						end = true;
 				}
 				break;
 				case pendulum:
@@ -204,6 +193,59 @@ class Trajectory{
 					printf("No cycle Type is chosen");
 				break;
 			}
+		}
+
+		virtual Pose& update(){
+			//If finished interpolating between current start and end Control Points
+			//Move onto next one.
+			//Also check that we have not reached the end of our list to avoid
+			//out of bounds exceptions
+			bool cp = false;
+			if(forward)
+				u++;			
+			else
+				u--;	//Should never be negative
+			int k0, k1, k2, k3;
+			k0 = k1 = k2 = k3 = 0;
+			//implies forward because u is >
+			if(cycleType!= circle && (u >= endFrame) && forward && cpIndex < (controlPoints.size() - 1)){
+				startFrame = endFrame;
+				cpIndex++;
+				endFrame = controlPoints.at(clampIndex(cpIndex))->frame;
+				u = startFrame;
+				cp = true;
+			}else if(cycleType != circle && (u <= endFrame) && !forward && cpIndex > 0){
+				//Should only reach this point if moving backwards aka !forward
+				startFrame = endFrame;
+				cpIndex--;
+				endFrame = controlPoints.at(clampIndex(cpIndex))->frame;
+				u = startFrame;
+				cp =true;
+			}else if(cycleType != circle && (u >= endFrame) && forward){
+				//do not have to check index, because it will be modded to stay safe
+				startFrame = controlPoints.at(clampIndex(cpIndex))->frame;
+				cpIndex++;
+				endFrame = controlPoints.at(clampIndex(cpIndex))->frame;
+				u = startFrame;
+				cp = true;
+			}else if(cycleType == circle && u>=endFrame){
+				int size = controlPoints.size();
+				int totalFrames = controlPoints.at(size-1)->frame;
+				int avg = totalFrames/size;
+				totalFrames += avg;
+				startFrame = endFrame;
+				cpIndex++;
+				cpIndex = cpIndex % size;
+				if(cpIndex ==0){
+					multiplier++;
+				}
+				endFrame = controlPoints.at(clampIndex(cpIndex))->frame + (totalFrames * multiplier);
+				cp = true;
+
+				if(startFrame == totalFrames)
+					end = true;
+			}
+			determineIndices(k0, k1, k2, k3);
 			
 			float u_norm;			//TODO rethink
 			if(forward){
@@ -236,7 +278,7 @@ class Trajectory{
 					
 					Eigen::MatrixXf interpolation = T*M*G;				//multipying vectors and matrices
 					PofU[i] = (float)interpolation(0,0);				//what do we do with this?
-
+					
 			//	printf("---%d %f %f\n", i, PofU[i], interpolation(0,0));
 			//		cout << "The matrix T is:\n" << endl << T << endl;
 			//		cout << "The matrix M is:\n" << endl << M << endl;
@@ -244,7 +286,7 @@ class Trajectory{
 			//		cout << "The matrix interpolation is:\n" << endl << interpolation << endl;
 			}
 			Pose* inbetween = new Pose(PofU[0], PofU[1], PofU[2], PofU[3], PofU[4], PofU[5], PofU[6]);
-			if(!end)
+			if(!end && !cp )
 				pointsAlongPath.push_back(&inbetween->position);
 			return *inbetween;
 		}

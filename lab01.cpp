@@ -1,10 +1,11 @@
-
+#if 1
 #pragma once
 #include <stdlib.h>
 
 // glew
 #include <glew.h>
 
+#include "Movie.h"
 
 #include "Pose.h"
 // standard
@@ -22,6 +23,7 @@
 //#include "Node.h"
 #include "Renderer.h"
 #include "matrix3.h"
+#include "Model.h"
 #include "matrix4.h"
 #include "Trajectory.h"
 #include "Scene.h"
@@ -41,11 +43,25 @@ using namespace std;
 int g_screenWidth  = 0;
 int g_screenHeight = 0;
 
+//===============================
+// movie variables
+//===============================
+#define GENERATE_MOVIE 1
+Movie output;
+std::string title;                          // Window Title
+std::string filetitle;                      // Movie file title prefix
+char filename[128];                         // Buffer for filename of a frame render to file
+
+
 // frame index
 int g_frameIndex = 0;
 
 Scene* scene;
 ModelView box;
+Actor* actor;
+
+Model planeYNeg;
+Model planeZNeg;
 
 double u;
 GLfloat PofU[7];
@@ -67,12 +83,32 @@ void init(void) {
 
 	glMatrixMode(GL_PROJECTION);
 
+
+	//Create Frame of reference
+	vertex3 blue = vertex3(0.0, 0.0, 1.0);
+	planeYNeg = Model(new Pose(), blue);
+	planeZNeg = Model(new Pose(), blue);
+
+	planeYNeg.mesh.loadBox(4.0, 0.2, 4.0);
+	planeYNeg.pose->position = vertex3(0.0, -2.1, 0.0);
+	planeYNeg.updateTransform();
+
+	planeZNeg.mesh.loadBox(4.0, 4.0, 0.2);
+	planeZNeg.pose->position = vertex3(0.0, 0.0, -2.1);
+	planeZNeg.updateTransform();
+
 	//responsible for global timing in the scene
 	//g_frameIndex = 0;
 	scene = new Scene();
 	//Actor* actor = new Actor(ModelView("resources/knight.txt"));
-	Actor* actor = new Actor(box);
+	actor = new Actor(new Trajectory(bSpline, pendulum), box);
+	//actor->path->cycleType = circle;
+	//actor->path->splineType = bSpline;
+
 	scene->actors.push_back(actor);
+
+	scene->models.push_back(&planeYNeg);
+	scene->models.push_back(&planeZNeg);
 
 	Renderer::init();
 }
@@ -139,11 +175,12 @@ void render( void ){
 		// enable lighting
 		glEnable(GL_LIGHTING);
 		glEnable(GL_LIGHT0);
+		glEnable(GL_COLOR_MATERIAL);
 
 		// light source attributes
 		GLfloat LightAmbient[]	= { 0.4f, 0.4f, 0.4f, 1.0f };
-		GLfloat LightDiffuse[]	= { 0.3f, 0.3f, 0.3f, 1.0f };
-		GLfloat LightSpecular[]	= { 0.4f, 0.4f, 0.4f, 1.0f };
+		GLfloat LightDiffuse[]	= { 1.0f, 1.0f, 1.0f, 1.0f };
+		GLfloat LightSpecular[]	= { 1.0f, 1.0f, 1.0f, 1.0f };
 		GLfloat LightPosition[] = { 5.0f, 5.0f, 5.0f, 1.0f };
 
 		glLightfv(GL_LIGHT0, GL_AMBIENT , LightAmbient );
@@ -158,13 +195,13 @@ void render( void ){
 		GLfloat material_Ke[]	= { 0.1f , 0.0f , 0.1f , 1.0f };
 		GLfloat material_Se		= 10;
 
-		glMaterialfv(GL_FRONT, GL_AMBIENT	, material_Ka);
-		glMaterialfv(GL_FRONT, GL_DIFFUSE	, material_Kd);
-		glMaterialfv(GL_FRONT, GL_SPECULAR	, material_Ks);
-		glMaterialfv(GL_FRONT, GL_EMISSION	, material_Ke);
-		glMaterialf (GL_FRONT, GL_SHININESS	, material_Se);
+		//glMaterialfv(GL_FRONT, GL_AMBIENT	, material_Ka);
+		//glMaterialfv(GL_FRONT, GL_DIFFUSE	, material_Kd);
+		//glMaterialfv(GL_FRONT, GL_SPECULAR	, material_Ks);
+		//glMaterialfv(GL_FRONT, GL_EMISSION	, material_Ke);
+		//glMaterialf (GL_FRONT, GL_SHININESS	, material_Se);
 
-		glTranslatef (0.0, 0.0, -5.0);
+		//glTranslatef (0.0, 0.0, -5.0);
 
 		//INSERT DRAW SCENE
 		Renderer::draw(scene);
@@ -173,8 +210,14 @@ void render( void ){
 		glutSwapBuffers();
 
 		// disable lighting
+		glDisable(GL_COLOR_MATERIAL);
 		glDisable(GL_LIGHT0);
 		glDisable(GL_LIGHTING);
+
+		if( GENERATE_MOVIE ) {
+			 output.write_frame( filename, g_frameIndex, g_screenWidth, g_screenHeight);
+		}
+
 }
 
 //================================
@@ -192,6 +235,7 @@ void reshape( int w, int h ) {
 	glMatrixMode( GL_PROJECTION );
 	glLoadIdentity();
 	gluPerspective(45.0, (GLfloat)w/(GLfloat)h, 1.0, 2000.0);
+	gluLookAt(0.0, 1.5, 5.0, 0.0, -3.0, -10.0, 0.0, 1.0, 0.0);
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -262,12 +306,13 @@ int main( int argc, char** argv ){
 	// create opengL window
 	glutInit( &argc, argv );
 	glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-	glutInitWindowSize( 500, 500 ); 
+	glutInitWindowSize( 640, 480 ); 
 	glutInitWindowPosition( 100, 100 );
 	glutCreateWindow( "Interpolation Example" );
-
+	
 	box = ModelView();
-	box.loadSphere(0.2, 20, 20);
+	//box.loadBox(0.2, 0.2, 0.2);
+	box.loadPyramid(0.4, 0.5);
 	// init
 	init();
 
@@ -288,3 +333,4 @@ int main( int argc, char** argv ){
 
 	return 0;
 }
+#endif //toggle current main file

@@ -147,7 +147,8 @@ public:
 
 	float dotProduct(const vertex3& vec){
 		//Return dot product of this * input
-		return vertex.dot(vec.vertex);
+		float ret = vertex.dot(vec.vertex);
+		return ret;
 	}
 
 	vertex3 cross (const vertex3& vec){
@@ -163,6 +164,13 @@ public:
 
 	void print(){
 		printf("----%f  %f  %f\n", this->getx(), this->gety(), this->getz());
+	}
+
+	void limit(float max){
+		if (getMagnitude() > max*max) {
+		  normalize();
+		vertex = vertex * max;
+		}
 	}
 
 	float getMagnitude() const{

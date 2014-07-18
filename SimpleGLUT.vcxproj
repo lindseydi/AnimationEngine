@@ -47,7 +47,7 @@
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\Debug\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\Debug\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Source;$(IncludePath)</IncludePath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Source;include;$(IncludePath)</IncludePath>
     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Source\GL;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -120,7 +120,7 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>glew32.lib;odbc32.lib;odbccp32.lib;opengl32.lib;glu32.lib;glut32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>C:\Users\Lindsey\Documents\Visual Studio 2012\Projects\Hierarchy\lib\libtiff.lib;glew32.lib;odbc32.lib;odbccp32.lib;opengl32.lib;glu32.lib;glut32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>.\Debug/SimpleGLUT.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -157,12 +157,17 @@
     <ClInclude Include="CollisionDetector.h" />
     <ClInclude Include="Flock.h" />
     <ClInclude Include="Helper.h" />
+    <ClInclude Include="include\tiff.h" />
+    <ClInclude Include="include\tiffconf.h" />
+    <ClInclude Include="include\tiffio.h" />
+    <ClInclude Include="include\tiffvers.h" />
     <ClInclude Include="Joint.h" />
     <ClInclude Include="Link.h" />
     <ClInclude Include="matrix3.h" />
     <ClInclude Include="matrix4.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="ModelView.h" />
+    <ClInclude Include="Movie.h" />
     <ClInclude Include="polygon.h" />
     <ClInclude Include="Pose.h" />
     <ClInclude Include="quaternion.h" />

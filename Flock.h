@@ -1,210 +1,235 @@
-#ifndef _BOIDACTOR_H_
-#define _BOIDACTOR_H_
+#ifndef _BoidModel_H_
+#define _BoidModel_H_
 
-#include "Actor.h"
+#pragma once
+#include "Model.h"
 
-class BoidActor{
+class BoidModel : public Model{
 
 public:
-	BoidActor(){
-		model = ModelView();
-		base = 0.3;
-		height = 0.4;
-		model.loadPyramid(base, height);
-		velocity = vertex3(0.1f, 0.1f, 0.1f);
+	BoidModel() : Model(){
+		mesh = ModelView();
+		mesh.loadPyramid(0.3, 0.4);
+		velocity = vertex3();
+		pose = new Pose(vertex3(), vertex3(0.0f, 0.0f, 1.57));
+		acceleration = vertex3();
+		radius = 0.05;
+		maxForce = 0.008f;
+		maxSpeed = .05f;
 	}
 
-	BoidActor(float posx, float posy, float posz){
-		model = ModelView();
-		velocity = vertex3(0.01f, 0.01f, 0.01f);	//what do I set this to?
-		pose = Pose();
-		pose.position.set(posx, posy, posz);
-		motivationPosition = vertex3(-5.0, 5.0, 0.0);
-		base = 0.3;
-		height = 0.4;
-		model.loadPyramid(base, height);
+	BoidModel(float posx, float posy, float posz, float theta) : Model(){
+		mesh = ModelView();
+		mesh.loadPyramid(0.3, 0.4);
+		velocity = vertex3(cos(theta), sin(theta), 0.0);
+		pose = new Pose(posx, posy, posz, 0.0f, 0.0f, theta);
+		acceleration = vertex3();
+		radius = 0.05;
+		maxForce = 0.008f;
+		maxSpeed = 0.1;
 	}
 
-	BoidActor(float posx, float posy, float posz, float base, float height){
-		model = ModelView();
-		velocity = vertex3(0.1f, 0.1f, 0.1f);
-		pose = Pose();
-		pose.position.set(posx, posy, posz);
-		motivationPosition = vertex3(0.0, 0.0, 5.0);
-		base = 0.3;
-		height = 0.4;
-		model.loadPyramid(base, height);
+	
+	BoidModel(float posx, float posy, float posz, float theta, vertex3 color) : Model(){
+		mesh = ModelView();
+		mesh.loadPyramid(0.3, 0.4);
+		velocity = vertex3(cos(theta), sin(theta), 0.0);
+		pose = new Pose(posx, posy, posz, 0.0f, 0.0f, theta);
+		acceleration = vertex3();
+		radius = 0.05;
+		maxForce = 0.008f;
+		maxSpeed = 0.05;
+		mesh.color = color;
 	}
 
-	~BoidActor(){
+	~BoidModel(){
 		
 	}
 
+	float distance(BoidModel* potentialneighbor){
+		//d(p, q) = \sqrt{(p_1 - q_1)^2 + (p_2 - q_2)^2+(p_3 - q_3)^2}.
+		float xx = this->pose->position.getx() - potentialneighbor->pose->position.getx();
+		xx = xx * xx;
+		float yy = this->pose->position.gety() - potentialneighbor->pose->position.gety();
+		yy = yy * yy;
+		float zz = this->pose->position.getz() - potentialneighbor->pose->position.getz();
+		zz = zz * zz;
+		float asdf = std::sqrt(xx + yy + zz);
+		//printf("Distance %f\n", asdf);
+		return asdf;
+	}
 
-	void computeNeighbors(vector<BoidActor*> allBoids, float radius){
+
+	float distance(vertex3 spot){
+		//d(p, q) = \sqrt{(p_1 - q_1)^2 + (p_2 - q_2)^2+(p_3 - q_3)^2}.
+		float xx = this->pose->position.getx() - spot.getx();
+		xx  = xx * xx;
+		float yy = this->pose->position.gety() - spot.gety();
+		yy = yy* yy;
+		float zz = this->pose->position.getz() - spot.getz();
+		zz = zz * zz;
+		return std::sqrt(xx + yy + zz);
+	}
+
+	vertex3 seek(vertex3 motivation){
+		vertex3 desired = motivation - this->pose->position;
+		desired.normalize();
+		desired = desired * maxSpeed;
+
+		vertex3 steer = desired - this->velocity;
+		steer.limit(maxForce);
+		return steer;
+	}
+
+	void computeNeighbors(vector<BoidModel*> allBoids, float radius, int myIndex){
 		//make better by onling looking ahead...
 		neighbors.clear();
-		for(unsigned int i=0; i<allBoids.size(); i++){
+		for(unsigned int i=0; i<allBoids.size(); ++i){
 			//TODO is this correct?
 			//supposed to check that angle is not obtuse(I.E when boid is looking forward there is a boid in it's path)
-			vertex3 distToPotential = allBoids.at(i)->pose.position - this->pose.position;
-			float angle = this->pose.orientation->dotProduct(distToPotential);
-		//	printf("Dot-- %f, me -- %f, %f, %f --dist %f, %f, %f\n", angle, pose.orientation.getx(), pose.orientation.gety(), pose.orientation.getz(), distToPotential.getx(), distToPotential.gety(), distToPotential.getz());
-			if(angle < 0){
-				//if(this->distance(allBoids.at(i)) < radius)	//this checks that it's not REALLY far away
-					neighbors.push_back(allBoids.at(i));
-			}
+			float d = distance(allBoids.at(i));
+			if((d< 1.5) && (i != myIndex)){
+				neighbors.push_back(allBoids.at(i));
+			}			
 		}
 		//printf("THis boid has %d neighbors\n", neighbors.size());
 	}
 
-	Pose& computeNextLocation(){
-		int numNeighbors = neighbors.size();
-		vertex3 cohesion = computeCohesion();		//suggesion 0
-		vertex3 separation = computeSeparation();	//suggestion 1
-		vertex3 alignment = computeAlignment();		//suggestion 2
-		vertex3 motivation = computeMotivation();	//suggestion 3
-		vertex3 suggestions[4] = {cohesion, separation, alignment, motivation};
-		int suggestion = 0;
-		
-		if(separation.isApprox(vertex3(0.0, 0.0, 0.0)) ){
-			suggestion = 3;
-			if(numNeighbors < 3 && !cohesion.isApprox(motivation)){
-				suggestion = 0;
-				velocity = vertex3(0.088, 0.008, 0.0);	
-			}else if(numNeighbors > 2 && !alignment.isApprox(motivation)){
-				suggestion = 2;
-				velocity = vertex3(0.01, 0.01, 0.0);
-			}
-		}
-		else {
-			suggestion = 3;
-			velocity = vertex3(0.1, 0.1, 0.08);
-		}
-		
-		 vertex3 futurePos = vertex3();
-	
-		// printf("Suggesion is %d (%f, %f, %f)\n", suggestion, suggestions[suggestion].getx(),suggestions[suggestion].gety(), suggestions[suggestion].getz() );
-		 futurePos =  moveAlongDirection(suggestions[suggestion]);
-
-		 //printf("Current (%f, %f, %f)-- Future (%f, %f, %f)\n\n", this->pose.position.getx(), this->pose.position.gety(), this->pose.position.getz(), futurePos.getx(), futurePos.gety(), futurePos.getz());
-		//return pose;
-		Pose* next = new Pose(futurePos, suggestions[suggestion]);
-		//printf("This boid has %d neighbors and is moving towards", numNeighbors);
-		//suggestions[suggestion].print();
-		return *next;
-	};
+	vertex3 computeMotivation(vertex3 motivationPosition){
+		//computes most obvious path
+		return seek(motivationPosition);
+	}
 
 	vertex3 computeCohesion(){
-		if(neighbors.size() > 0){
-			vertex3 perceivedCenter;
-			vector<vertex3> futurePositions;
-			futurePositions.resize(neighbors.size());
-			for(unsigned int i=0; i<neighbors.size(); i++){
-				vertex3 direction = neighbors.at(i)->computeMotivation();
-				futurePositions.at(i) = neighbors.at(i)->moveAlongDirection(direction);
-				perceivedCenter = perceivedCenter + futurePositions.at(i);
-			}
-			perceivedCenter = perceivedCenter / (float)neighbors.size();
-			vertex3 diff =  this->pose.getEulerRepresentation() - perceivedCenter;
-			//diff.normalize();
-			//diff.print();
-			return diff;
-		}else{
-			return computeMotivation();
+		vertex3 sum = vertex3();
+		int size = neighbors.size();
+		for(unsigned int i=0; i<size; ++i){
+			sum = sum + neighbors.at(i)->pose->position;
 		}
+		if(size > 0){
+			sum = sum / size;
+			return seek(sum);
+		}else
+			return vertex3();
 	}
 
-	vertex3 moveAlongDirection(vertex3 direction){
-		//TODO  - check that this is correct!
-		direction.normalize();
-		float futureX = this->pose.position.getx() + (direction.getx() * this->velocity.getx());
-		float futureY = this->pose.position.gety() + (direction.gety() * this->velocity.gety());
-		float futureZ = this->pose.position.getz() + (direction.getz() * this->velocity.getz());
-		//printf("future is (%f, %f, %f)\n", futureX, futureY, futureZ);
-		return vertex3(futureX, futureY, futureZ);
-	}
-
-	float getRadius() const {
-		return sqrt((base/2 * base/2) + (height/2 * height/2));
-	}
-
-	bool boidsIntersect(vertex3 myBoidPos, vertex3 otherBoidPos, float otherBoidRadius){
-		//create a circle bounding box on the fly
-		float distX = otherBoidPos.getx() - myBoidPos.getx();
-		float distY = otherBoidPos.gety() - myBoidPos.gety();
-
-		float magnitude = sqrt((distX * distX) + (distY * distY));
-		if(magnitude < (this->getRadius() + otherBoidRadius))
-			return true;
-		else
-			return false;
-	}
-
-	vertex3 computeMotivation(){
-		//find food
-		//compare orientation towards motivation
-		vertex3 dist = motivationPosition - this->pose.position;
-		return dist;
-	}
-	
-	//why doesn't boidActor know about it's own methods?
 	vertex3 computeSeparation(){
-		//computes most obvious path
-		vertex3 myFuturePos = moveAlongDirection(computeMotivation());
-		//stores stupid future positions of all neighbors
-		vector<vertex3> futurePositions;
-		futurePositions.resize(neighbors.size());
-		for(unsigned int i=0; i<neighbors.size(); i++){
-			vertex3 direction = neighbors.at(i)->computeMotivation();
-			futurePositions.at(i) = neighbors.at(i)->moveAlongDirection(direction);
-			if(boidsIntersect(myFuturePos, futurePositions.at(i), neighbors.at(i)->getRadius())){
-				//reduce speed
-				this->velocity = this->velocity * .8;
-				return computeMotivation();
+		
+		float desiredSeparation = 1.0f;
+		vertex3 steer = vertex3();
+		int count = 0;
+		for(unsigned int i=0; i<neighbors.size(); ++i){
+			float d = distance(neighbors.at(i));
+			if((d > 0.0) && (d < desiredSeparation)){
+				vertex3 diff = this->pose->position - neighbors.at(i)->pose->position;
+				diff.normalize();
+				diff = diff / d;
+				steer = steer + diff;
+				count++;
 			}
 		}
-		return vertex3();
+		if(count > 0){
+			steer = steer / (float)count;
+		}
+		if(steer.getMagnitude() > 0.0){
+			steer.normalize();
+			steer = steer * maxSpeed;
+			steer = steer - velocity;
+			steer.limit(maxForce);
+		}
+		return steer;
 	 }
 
 	vertex3 computeAlignment(){
 		//velocity matching
-		//ignore for now
-		vertex3 averageDirection = vertex3();
-		for(unsigned int i=0; i<neighbors.size(); i++){
-			averageDirection = averageDirection + neighbors.at(i)->pose.getEulerRepresentation();
+		vertex3 sum = vertex3();
+		unsigned int size = neighbors.size();
+		for(unsigned int i=0; i<size; ++i){
+			sum = sum + neighbors.at(i)->velocity;
 		}
-		averageDirection = averageDirection/ neighbors.size();
-		return averageDirection - this->pose.getEulerRepresentation();
+		if(size > 0){
+			sum = sum / size;
+			sum.normalize();
+			sum = sum * maxSpeed;
+			vertex3 steer = sum - this->velocity;
+			steer.limit(maxForce);
+			return steer;
+		}else{
+			return vertex3();
+		}
 	}
 
-	float distance(BoidActor* potentialneighbor){
-		//d(p, q) = \sqrt{(p_1 - q_1)^2 + (p_2 - q_2)^2+(p_3 - q_3)^2}.
-		float xx = this->pose.position.getx() * potentialneighbor->pose.position.getx();
-		float yy = this->pose.position.gety() * potentialneighbor->pose.position.gety();
-		float zz = this->pose.position.getz() * potentialneighbor->pose.position.getz();
-		return std::sqrt(xx + yy + zz);
+	
+	void computeNextLocation(vertex3 motivationPosition){
+		vertex3 motivation = computeMotivation(motivationPosition) * 0.1f;
+		vertex3 separation = computeSeparation() * 1.5f;
+		vertex3 align = computeAlignment() * .75;
+		vertex3 cohesion = computeCohesion() * 1.0;
+		/*
+		if(!separation.isApprox(vertex3())){
+			acceleration = acceleration + separation;
+		}
+		else{
+			acceleration = acceleration + align + cohesion + motivation;
+		}
+		*/
+		acceleration = acceleration + motivation;
+		acceleration = acceleration + separation + align + cohesion;
+
+		
+		//printf("Sep: (%f, %f), Align (%f, %f), Coh (%f, %f), Acc: (%f, %f)\n", separation.getx(), separation.gety(), align.getx(), align.gety(), cohesion.getx(), cohesion.gety(), acceleration.getx(), acceleration.gety());
 	}
 
-	Pose& getPose(){
+	virtual void update(){
+		//computeNextLocation(motivationPosition); this is taken care of from Flock update
+		velocity = velocity + acceleration;
+		velocity.limit(maxSpeed);
+		this->pose->position =  this->pose->position + velocity;
+		float theta = (float)atan2(velocity.gety(), velocity.getx());
+		//theta = theta * -1.0; if -y/x
+		theta += 3.0*PI/2.0;
+		while(theta > (2.0*PI)){
+			theta -= 2.0*PI;
+		}while(theta < 0.0){
+			theta += 2.0*PI;
+		}
+		this->pose->orientation->setz(theta);
+		acceleration = vertex3();
+		this->updateTransformEuler();
+		if(pose->position.vertex.hasNaN())
+			printf("err\n");
+
+		//printf("Pos (%f, %f) Vel (%f, %f), theta %f \n", this->pose->position.getx(),
+		//	this->pose->position.gety(), velocity.getx(), velocity.gety(), theta);
+	}
+
+	Pose* getPose(){
 		return this->pose;
 	}
 
-	ModelView& getModel(){
-		return this->model;
+	vertex3 getAcceleration(){
+		return this->acceleration;
 	}
 
-	void setPose(Pose& pose){
+	void setPose(Pose* pose){
 		this->pose = pose;
 	}
 
+	void setAcceleration(vertex3 acceleration){
+		this->acceleration = acceleration;
+	}
+
 	protected:
-	vector<BoidActor*> neighbors;
-	Pose pose;
-	float base, height;
-	ModelView model;
+	vector<BoidModel*> neighbors;
+	//Since this simulation is in 2D
+	//position z =0
+	//orientation will be 0, 0, theta;
+	//which is all encompassed in the Model paent
 	vertex3 velocity;
-	vertex3 motivationPosition;
+	float radius;
+	float maxForce;
+	float maxSpeed;
+	vertex3 acceleration;
 
 
 	public:
@@ -218,61 +243,65 @@ public:
 #define _Flock_H_
 
 #include "Actor.h"
+#include "vertex3.h"
 
-class Flock: public Actor{
+class Flock{
 	
 public:
-	vector<BoidActor*> boids;
+	vector<BoidModel*> boids;
+	vertex3 motivationPosition;
 
 	Flock(){
-		createBoids(10, -2.0, 2.0);
+		createBoids(80, -2.0, 2.0, -5.0, -2.0);
+		this->motivationPosition = vertex3();
+	}
+	Flock(vertex3 motivationPosition){
+		createBoids(100, -15.0, 15.0, -13.0, 6.0);
+		this->motivationPosition = motivationPosition;
 	}
 
-	Pose& update(){
+	void update(){
 		//sense
 		//create neighbors
-		for(unsigned int i=0; i<boids.size(); i++){
-			boids.at(i)->computeNeighbors(boids, 0.5);
+		for(unsigned int i=0; i<boids.size(); ++i){				
+			boids.at(i)->computeNeighbors(boids, 1.25, i);
+			//plan
+			boids.at(i)->computeNextLocation(motivationPosition);
 		}
-		//plan
-		vector<Pose*> computedFutures;
-		for(unsigned int i=0; i<boids.size(); i++){
-			computedFutures.push_back(&boids.at(i)->computeNextLocation());
-			vertex3 direction = computedFutures.back()->getEulerRepresentation();
-			//computes the angle between direction and up vector
-			double theta = atan2(direction.gety(), direction.getx()) - atan2(1.0, 0.0);
-			//corrects  in order to have a "normalized" angle
-			while(theta <= -PI){
-				theta += 2*PI;
-			}
-			while(theta > PI){
-				theta -= 2* PI;
-			}
-			computedFutures.back()->orientation = new vertex3(0.0, 0.0, (float)theta);
-		}
-
+		//boids.at(leaderIndex)->setAcceleration(
+		//	boids.at(leaderIndex)->getAcceleration() + 
+		//	boids.at(leaderIndex)->computeMotivation(motivationPosition)*1.5);
 		//act
-		for(unsigned int i=0; i<boids.size(); i++){
-			boids.at(i)->setPose(*computedFutures.at(i));
+		//printf("\n\n");
+		for(unsigned int i=0; i<boids.size(); ++i){
+			//printf("#%d : ", i);
+			boids.at(i)->update();
 		}
-		//return pose leader??
-		Pose* fake = new Pose();
-		return *fake;
 	}
-
-protected:
-	float randBetween(float min, float max){
+	
+	static float randBetween(float min, float max){
 		float ret = min + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(max-min)));
 		return ret;
 	}
 
-	void createBoids(int numBoids, float minRange, float maxRange){
+	static vertex3 randColor(){
+		float x, y, z;
+		x = randBetween(0.0, 1.0);
+		y = randBetween(0.0, 1.0);
+		z = randBetween(0.0, 1.0);
+		return vertex3(x, y, z);
+	}
+
+	protected:
+	void createBoids(int numBoids, float minXRange, float maxXRange, float minYRange, float maxYRange){
 		for(unsigned int i=0; i<numBoids; i++){
-			float x = randBetween(minRange, maxRange);
-			float y = randBetween(minRange, maxRange);
+			float x = randBetween(minXRange, maxXRange);
+			float y = randBetween(minYRange, maxYRange);
 			float z = 0.0;
-			printf("New Boid at (%f, %f, %f)\n", x, y, z);
-			boids.push_back(new BoidActor(x,y,z));
+			float theta = randBetween(0, 2.0*PI);
+			vertex3 color = randColor();
+			printf("New Boid at (%f, %f, %f) theta %f\n", x, y, z, theta);
+			boids.push_back(new BoidModel(x,y,z, theta, color));
 		}
 	}
 	

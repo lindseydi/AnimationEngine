@@ -16,6 +16,9 @@
     <Filter Include="shader">
       <UniqueIdentifier>{1d096479-7147-45b2-ab5c-162a2b6aa565}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include">
+      <UniqueIdentifier>{b7cb438a-8d1f-4e18-a394-cdaf20d47812}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="StdAfx.cpp">
@@ -109,6 +112,21 @@
     </ClInclude>
     <ClInclude Include="Helper.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Movie.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\tiff.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\tiffconf.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\tiffio.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\tiffvers.h">
+      <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

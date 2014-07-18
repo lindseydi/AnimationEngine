@@ -1,6 +1,11 @@
-/*
+#if 0
 #pragma once
 #include <stdlib.h>
+
+// glew
+#include <glew.h>
+
+
 #include "Pose.h"
 // standard
 #include <assert.h>
@@ -8,6 +13,7 @@
 
 // glut
 
+#include "Movie.h"
 #include <stdio.h>
 #include <sys/stat.h>
 
@@ -29,6 +35,16 @@
 #include <GL/glut.h>
 #include <GL/glu.h>
 using namespace std;
+
+//===============================
+// movie variables
+//===============================
+#define GENERATE_MOVIE 1
+Movie output;
+std::string title;                          // Window Title
+std::string filetitle;                      // Movie file title prefix
+char filename[128];                         // Buffer for filename of a frame render to file
+
 
 //================================
 // global variables
@@ -52,6 +68,16 @@ GLfloat PofU[7];
 //================================
 void init(void) {
 	// init something before main loop...
+
+	GLenum err = glewInit();
+	if (GLEW_OK != err)
+	{
+	 //Problem: glewInit failed, something is seriously wrong.
+	  fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
+	}
+	fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
+
+
 	glClearColor(1.0, 1.0, 1.0, 0.0);
 
 	glMatrixMode(GL_PROJECTION);
@@ -65,11 +91,20 @@ void init(void) {
 	box.loadPyramid(1.0, 1.0);
 
 	//Actor* actor = new Actor(ModelView("resources/knight.txt"));
-	Actor* actor = new Actor(box);
-	Flock* flock = new Flock();
+	Model* actor = new Model(new Pose());
+	actor->mesh.loadBox(12.0, 12.0, 12.0);
+	Flock* flock = new Flock(vertex3(-10.0, 10.0, 0.0));
 
 	//scene->actors.push_back(actor);
 	scene->flock = flock;
+
+	//scene->models.push_back(actor);
+
+	Renderer::init();
+
+	//movie init
+	title = "Reynolds Boid Simulation";
+	filetitle = "reynolds_boid_simulation";
 }
 
 Trajectory& createKeyFrames(void){
@@ -81,7 +116,8 @@ Trajectory& createKeyFrames(void){
 // update
 //================================
 void update( void ) {
-	//necessary?	
+	//necessary?
+	scene->update();
 }
 
 //================================
@@ -135,6 +171,11 @@ void render( void ){
 		//Renderer::draw(new Pose(0.0, 0.0, -100.0, 15.0, 30.0, 0.0), &box);
 		glutSwapBuffers();
 
+	    if( GENERATE_MOVIE ) {
+			 output.write_frame( filename, g_frameIndex, g_screenWidth, g_screenHeight);
+		}
+
+
 		// disable lighting
 		glDisable(GL_LIGHT0);
 		glDisable(GL_LIGHTING);
@@ -157,7 +198,7 @@ void reshape( int w, int h ) {
 	gluPerspective(45.0, (GLfloat)w/(GLfloat)h, 0.1, 1000.0);
 	//glTranslatef(0.0, 0.0, -10.0);
 
-	gluLookAt(0.0, 0.0, -20.0, 0.0, 0.0, -19.0, 0.0, 1.0, 0.0);
+	gluLookAt(0.0, 0.0, -30.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -169,7 +210,7 @@ void reshape( int w, int h ) {
 void timer( int value ) {	
 	// increase frame index
 	g_frameIndex++;
-	//update();
+	update();
 	
 	// render
 	glutPostRedisplay();
@@ -192,7 +233,7 @@ int main( int argc, char** argv ) {
 	// create opengL window
 	glutInit( &argc, argv );
 	glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-	glutInitWindowSize( 500, 500 ); 
+	glutInitWindowSize( 640, 480 ); 
 	glutInitWindowPosition( 100, 100 );
 	glutCreateWindow( "Interpolation Example" );
 
@@ -214,4 +255,4 @@ int main( int argc, char** argv ) {
 	return 0;
 }
 
-*/
+#endif //toggles current main file

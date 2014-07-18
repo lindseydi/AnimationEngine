@@ -62,7 +62,7 @@ bool Link::isNull(){
 //----------------------------------Link Root---------------------------------------//
 
 LinkRoot::LinkRoot(): Link(){
-	path = new Trajectory(0);	//sets cycle to type circle	
+	path = new Trajectory(pendulum);	//sets cycle to type circle	
 	//1 is pendulum
 	//2 is clamp
 	generatePath();
@@ -70,12 +70,13 @@ LinkRoot::LinkRoot(): Link(){
 	
 
 LinkRoot::LinkRoot(const ModelView& mesh, Pose* pose): Link(mesh, pose){
-	path = new Trajectory(1);
+	path = new Trajectory(pendulum);
+	//path->cycleType = circle;
 	generatePath();
 }
 
 LinkRoot::LinkRoot(const ModelView& mesh, Pose* pose, std::string name): Link(mesh, pose, name){
-	path = new Trajectory(1);
+	path = new Trajectory(pendulum);
 	generatePath();
 }
 
@@ -89,14 +90,19 @@ void LinkRoot::update(){
 void LinkRoot::generatePath(){
 	path->resetPath();
 	//attempts to create circular walk
-	path->controlPoints.push_back(new PoseKey(vertex3(0.0, 0.0, 1.0)*5.0, vertex3((PI/2.0)+PI/2.0, 0.0, PI/2.0), 0));
-	path->controlPoints.push_back(new PoseKey(vertex3(-sqrt(2.0)/2.0, 0.0, sqrt(2.0)/2.0) * 5.0, vertex3((3.0*PI/4.0)+PI/2.0, 0.0, PI/2.0), 120));
-	path->controlPoints.push_back(new PoseKey(vertex3(-1.0, 0.0, 0.0) * 5.0, vertex3((PI)+PI/2.0, 0.0, PI/2.0), 240));
-	path->controlPoints.push_back(new PoseKey(vertex3(-sqrt(2.0)/2.0, 0.0, -sqrt(2.0)/2.0) * 5.0, vertex3((5.0*PI/4.0)+PI/2.0, 0.0, PI/2.0), 360));
-	path->controlPoints.push_back(new PoseKey(vertex3(0.0, 0.0, -1.0) * 5.0, vertex3((3.0*PI/2.0)+PI/2.0, 0.0, PI/2.0), 480));
-	path->controlPoints.push_back(new PoseKey(vertex3((sqrt(2.0)/2.0), 0.0, (-sqrt(2.0)/2.0)) * 5.0, vertex3((7.0*PI/4.0)+PI/2.0, 0.0, PI/2.0), 600));
-	//path->controlPoints.push_back(new PoseKey(vertex3(1.0, 0.0, 0.0)* 5.0, vertex3(PI/2.0, 0.0, PI/2.0), 720));
-	//path->controlPoints.push_back(new PoseKey(vertex3(sqrt(2.0)/2.0, 0.0, sqrt(2.0)/2.0)* 5.0, vertex3((PI/4.0)+PI/2.0, 0.0, PI/2.0), 840));
+	//path->controlPoints.push_back(new PoseKey(vertex3(1.0, 0.0, 0.0)* 5.0, vertex3(0.0, 0.0, PI/2.0), 0));
+	//path->controlPoints.push_back(new PoseKey(vertex3(sqrt(3.0)/2.0, 0.0, 0.5)* 5.0, vertex3(11.0*PI/6.0, 0.0, PI/2.0), 60));
+	path->controlPoints.push_back(new PoseKey(vertex3(sqrt(2.0)/2.0, 0.0, sqrt(2.0)/2.0)* 5.0, vertex3(7.0*PI/4.0, 0.0, PI/2.0), 120));
+	path->controlPoints.push_back(new PoseKey(vertex3(0.5, 0.0, sqrt(3.0)/2.0)* 5.0, vertex3(5.0*PI/3.0, 0.0, PI/2.0), 180));
+	path->controlPoints.push_back(new PoseKey(vertex3(0.0, 0.0, 1.0)*5.0, vertex3(3.0*PI/2.0, 0.0, PI/2.0), 240));
+	path->controlPoints.push_back(new PoseKey(vertex3(-sqrt(2.0)/2.0, 0.0, sqrt(2.0)/2.0) * 5.0, vertex3(5.0*PI/4.0, 0.0, PI/2.0), 360));
+	path->controlPoints.push_back(new PoseKey(vertex3(-1.0, 0.0, 0.0) * 5.0, vertex3(PI, 0.0, PI/2.0), 480));
+	path->controlPoints.push_back(new PoseKey(vertex3(-sqrt(2.0)/2.0, 0.0, -sqrt(2.0)/2.0) * 5.0, vertex3(3.0*PI/4.0, 0.0, PI/2.0), 600));
+	path->controlPoints.push_back(new PoseKey(vertex3(0.0, 0.0, -1.0) * 5.0, vertex3(PI/2.0, 0.0, PI/2.0), 720));
+	path->controlPoints.push_back(new PoseKey(vertex3(sqrt(2.0)/2.0, 0.0, -sqrt(2.0)/2.0) * 5.0, vertex3(PI/4.0, 0.0, PI/2.0), 840));
+//	path->controlPoints.push_back(new PoseKey(vertex3(sqrt(3.0)/2.0, 0.0, -0.5)* 5.0, vertex3(PI/6.0, 0.0, PI/2.0), 900));
+
+	
 
 	/*
 	//-----------------------------------------------------------------------------------------------//

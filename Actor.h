@@ -18,10 +18,19 @@ public:
 		path = new Trajectory();
 	}
 
+	Actor(Trajectory* trajectory){
+		this->path = trajectory;
+	}
+
 	Actor(const ModelView& model){
 		//This is the joint that the actor is to start in world space
 		this->model = ModelView(model);
-		path = new Trajectory();
+		this->path = new Trajectory();
+	}
+
+	Actor(Trajectory* trajectory, const ModelView& mesh){
+		this->path = trajectory;
+		this->model = mesh;
 	}
 
 	~Actor(){

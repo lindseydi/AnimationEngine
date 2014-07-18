@@ -1,12 +1,18 @@
-/*
+#if 0
+
 #pragma once
 #include <stdlib.h>
+
+// glew
+#include <glew.h>
+
+#include "Movie.h"
+
 #include "Pose.h"
 // standard
 #include <assert.h>
 #include <math.h>
 
-// glut
 
 #include <stdio.h>
 #include <sys/stat.h>
@@ -36,6 +42,16 @@ using namespace std;
 int g_screenWidth  = 0;
 int g_screenHeight = 0;
 
+//===============================
+// movie variables
+//===============================
+#define GENERATE_MOVIE 0
+Movie output;
+std::string title;                          // Window Title
+std::string filetitle;                      // Movie file title prefix
+char filename[128];                         // Buffer for filename of a frame render to file
+
+
 // frame index
 int g_frameIndex = 0;
 
@@ -46,6 +62,9 @@ Joint rightHip, leftHip;
 LinkRoot pelvis;
 Link rightLeg, leftLeg;
 
+Model planeYNeg;
+Model planeZNeg;
+
 double u;
 GLfloat PofU[7];
 
@@ -54,6 +73,17 @@ GLfloat PofU[7];
 //================================
 void init(void) {
 	// init something before main loop...
+
+	GLenum err = glewInit();
+	if (GLEW_OK != err)
+	{
+	 //Problem: glewInit failed, something is seriously wrong.
+	  fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
+	}
+	fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
+
+
+
 	glClearColor(1.0, 1.0, 1.0, 0.0);
 
 	glMatrixMode(GL_PROJECTION);
@@ -93,30 +123,30 @@ void init(void) {
 
 	leftHip = Joint(Pose());
 	leftHip.inboard_displacement = vertex3(0.0f, -0.7f, 0.0f);
-	leftHip.outboard_displacement = vertex3(0.0f, 0.7f, 0.0f);
+	leftHip.outboard_displacement = vertex3(-0.2f, 0.7f, 0.0f);
 	leftHip.angle =PI/2.0;
 	leftHip.angularVelocity = 0.1;
 	leftHip.path->resetPath();
 	leftHip.addPointOnPath(new PoseKey(-sqrt(2.0)/2.0, sqrt(2.0)/2.0, 0.0f, 0.0f, 0.0f, 0.0, 0));
-	leftHip.addPointOnPath(new PoseKey(-1.0/2.0, sqrt(3.0)/2.0, 0.0f, 0.0f, 0.0f, 0.0, 45));
-	leftHip.addPointOnPath(new PoseKey(0, 1.0, 0.0f, 0.0f, 0.0f, 0.0f, 90));
-	leftHip.addPointOnPath(new PoseKey(1.0/2.0, sqrt(3.0)/2.0, 0.0f, 0.0f, 0.0f, 0.0, 135));
-	leftHip.addPointOnPath(new PoseKey(sqrt(2.0)/2.0, sqrt(2.0)/2.0, 0.0f, 0.0f, 0.0f, 0.0f, 180));
+	leftHip.addPointOnPath(new PoseKey(-1.0/2.0, sqrt(3.0)/2.0, 0.0f, 0.0f, 0.0f, 0.0, 15));
+	leftHip.addPointOnPath(new PoseKey(0, 1.0, 0.0f, 0.0f, 0.0f, 0.0f, 30));
+	leftHip.addPointOnPath(new PoseKey(1.0/2.0, sqrt(3.0)/2.0, 0.0f, 0.0f, 0.0f, 0.0, 45));
+	leftHip.addPointOnPath(new PoseKey(sqrt(2.0)/2.0, sqrt(2.0)/2.0, 0.0f, 0.0f, 0.0f, 0.0f, 60));
 	leftHip.rotational_frame = matrix4( 0, 0, 1, 0,
                                         -1, 0, 0, 0,
                                          0, 1, 0, 0,
                                          0, 0, 0, 1 );
 	rightHip = Joint(Pose());
 	rightHip.inboard_displacement = vertex3(0.0f, 0.7f, 0.0f);
-	rightHip.outboard_displacement = vertex3(0.0f, -0.7f, 0.0f);
+	rightHip.outboard_displacement = vertex3(0.2f, -0.7f, 0.0f);
 	rightHip.angle = PI/2.0;
 	rightHip.angularVelocity = 0.1;
 	rightHip.path->resetPath();
 	rightHip.addPointOnPath(new PoseKey(-sqrt(2.0)/2.0, -sqrt(2.0)/2.0, 0.0f, 0.0f, 0.0f, 0.0, 0));
-	rightHip.addPointOnPath(new PoseKey(-1.0/2.0, -sqrt(3.0)/2.0, 0.0f, 0.0f, 0.0f, 0.0, 45));
-	rightHip.addPointOnPath(new PoseKey(0, -1.0, 0.0f, 0.0f, 0.0f, 0.0f, 90));
-	rightHip.addPointOnPath(new PoseKey(1.0/2.0, -sqrt(3.0)/2.0, 0.0f, 0.0f, 0.0f, 0.0, 135));
-	rightHip.addPointOnPath(new PoseKey(sqrt(2.0)/2.0, -sqrt(2.0)/2.0, 0.0f, 0.0f, 0.0f, 0.0f, 180));
+	rightHip.addPointOnPath(new PoseKey(-1.0/2.0, -sqrt(3.0)/2.0, 0.0f, 0.0f, 0.0f, 0.0, 15));
+	rightHip.addPointOnPath(new PoseKey(0, -1.0, 0.0f, 0.0f, 0.0f, 0.0f, 30));
+	rightHip.addPointOnPath(new PoseKey(1.0/2.0, -sqrt(3.0)/2.0, 0.0f, 0.0f, 0.0f, 0.0, 45));
+	rightHip.addPointOnPath(new PoseKey(sqrt(2.0)/2.0, -sqrt(2.0)/2.0, 0.0f, 0.0f, 0.0f, 0.0f, 60));
 	rightHip.rotational_frame = matrix4( 0, 0, 1, 0,
                                          -1, 0, 0, 0,
                                          0, 1, 0, 0,
@@ -139,10 +169,27 @@ void init(void) {
 	scene.hierarchy = &pelvis;
 	printf("Hierarchy set");
 
+	//Create Frame of reference
+	vertex3 blue = vertex3(0.0, 0.0, 1.0);
+	planeYNeg = Model(new Pose(), blue);
+	planeZNeg = Model(new Pose(), blue);
+
+	planeYNeg.mesh.loadBox(12.0, 0.2, 12.0);
+	planeYNeg.pose->position = vertex3(0.0, -1.4, 0.0);
+	planeYNeg.updateTransform();
+
+	planeZNeg.mesh.loadBox(4.0, 4.0, 0.2);
+	planeZNeg.pose->position = vertex3(0.0, 0.0, -2.1);
+	planeZNeg.updateTransform();
+
+	scene.models.push_back(&planeYNeg);
+	//scene.models.push_back(&planeZNeg);
+
 	//scene.model = new Model(footModel, new PoseEuler(0.0, 0.0, 0.0, 0.0, 0.0, 90.0));
 	//scene.models.push_back(new Link(pelvisModel, new PoseEuler(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)));
 	//scene.models.push_back(new Link(rightLegModel, new PoseEuler(0.0, -1.4, 0.0, 0.0, 0.0, 0.0)));
 
+	Renderer::init();
 }
 
 Trajectory& createKeyFrames(void){
@@ -171,18 +218,18 @@ void render( void ){
 		// render state
 		glEnable(GL_DEPTH_TEST);
 		glShadeModel(GL_SMOOTH);
-
+		glEnable(GL_POINT_SMOOTH);
 
 		// enable lighting
 		glEnable(GL_LIGHTING);
 		glEnable(GL_LIGHT0);
 
 		// light source attributes
-		GLfloat Light
-		ent[]	= { 1.0f, 1.0f, 1.0f, 1.0f };
+		
+		GLfloat LightAmbient[]	= { 0.2f, 0.2f, 0.2f, 1.0f };
 		GLfloat LightDiffuse[]	= { 1.0f, 1.0f, 1.0f, 1.0f };
 		GLfloat LightSpecular[]	= { 1.0f, 1.0f, 1.0f, 1.0f };
-		GLfloat LightPosition[] = { 0.0f, 10.0f, 0.0f, 1.0f };
+		GLfloat LightPosition[] = { -7.0f, -15.0f, -7.0f, 1.0f };
 
 		glLightfv(GL_LIGHT0, GL_AMBIENT , LightAmbient );
 		glLightfv(GL_LIGHT0, GL_DIFFUSE , LightDiffuse );
@@ -196,13 +243,13 @@ void render( void ){
 		GLfloat material_Ke[]	= { 0.8f , 0.8f , 0.8f , 1.0f };
 		GLfloat material_Se		= 10;
 
-		glMaterialfv(GL_FRONT, GL_AMBIENT	, material_Ka);
-		glMaterialfv(GL_FRONT, GL_DIFFUSE	, material_Kd);
-		glMaterialfv(GL_FRONT, GL_SPECULAR	, material_Ks);
-		glMaterialfv(GL_FRONT, GL_EMISSION	, material_Ke);
-		glMaterialf (GL_FRONT, GL_SHININESS	, material_Se);
+		//glMaterialfv(GL_FRONT, GL_AMBIENT	, material_Ka);
+		//glMaterialfv(GL_FRONT, GL_DIFFUSE	, material_Kd);
+		//glMaterialfv(GL_FRONT, GL_SPECULAR	, material_Ks);
+		//glMaterialfv(GL_FRONT, GL_EMISSION	, material_Ke);
+		//glMaterialf (GL_FRONT, GL_SHININESS	, material_Se);
 
-		glTranslatef (0.0, 0.0, -5.0);
+		//glTranslatef (0.0, 0.0, -5.0);
 
 		//INSERT DRAW SCENE
 		Renderer::draw(&scene);
@@ -216,7 +263,13 @@ void render( void ){
 		//Renderer::draw(pelvis.model);
 		glutSwapBuffers();
 
+		//output to .tiff file
+		if( GENERATE_MOVIE ) {
+			 output.write_frame( filename, g_frameIndex, g_screenWidth, g_screenHeight);
+		}
+
 		// disable lighting
+		glDisable(GL_POINT_SMOOTH);
 		glDisable(GL_LIGHT0);
 		glDisable(GL_LIGHTING);
 }
@@ -247,7 +300,7 @@ void reshape( int w, int h ) {
 //	gluLookAt(0.0, 0.0, -10.0, 0.0, 0.0, -9.0, 0.0, 1.0, 0.0);
 	//when rotating around y, must change x and z values
 	//gluLookAt(10.0, 0.0, 0.0, 9.0, 0.0, 0.0, 0.0, 1.0, 0.0);
-	gluLookAt(10.0, 3.0, -10.0, 4.0, 0.0, -4.0, 0.0, 1.0, 0.0);
+	gluLookAt(-10.0, 3.0, -10.0, -4.0, 0.0, -4.0, 0.0, 1.0, 0.0);
 
 
 	glMatrixMode(GL_MODELVIEW);
@@ -283,7 +336,7 @@ int main( int argc, char** argv ) {
 	// create opengL window
 	glutInit( &argc, argv );
 	glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-	glutInitWindowSize( 500, 500 ); 
+	glutInitWindowSize( 640, 480 ); 
 	glutInitWindowPosition( 100, 100 );
 	glutCreateWindow( "Interpolation Example" );
 
@@ -307,4 +360,4 @@ int main( int argc, char** argv ) {
 	return 0;
 }
 
-*/
+#endif

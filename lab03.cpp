@@ -1,10 +1,12 @@
-/*
+
+#if 0
 
 #pragma once
 #include <stdlib.h>
 
 // glew
 #include <glew.h>
+#include "Movie.h"
 
 #include "Pose.h"
 // standard
@@ -38,6 +40,16 @@ using namespace std;
 //================================
 // global variables
 //================================
+
+//===============================
+// movie variables
+//===============================
+#define GENERATE_MOVIE 0
+Movie output;
+std::string title;                          // Window Title
+std::string filetitle;                      // Movie file title prefix
+char filename[128];                         // Buffer for filename of a frame render to file
+
 // screen size
 int g_screenWidth  = 0;
 int g_screenHeight = 0;
@@ -46,7 +58,7 @@ int g_screenHeight = 0;
 int g_frameIndex = 0;
 
 Scene* scene;
-double time;
+double time_scene;
 double step;
 
 double u;
@@ -56,8 +68,10 @@ Model box;
 Model planeXNeg, planeYNeg, planeZNeg;
 Model planeXPos, planeYPos, planeZPos;
 
+
+Actor* actor;
 vector<polygon> planes;
-const int numBalls = 20;
+const int numBalls = 25;
 vector<RigidBody*> balls;
 
 
@@ -76,7 +90,7 @@ void changePosition(RigidBody* body){
 void init(void) {
 	// init something before main loop...
 
-
+	Helper::seed();
 	GLenum err = glewInit();
 	if (GLEW_OK != err)
 	{
@@ -90,7 +104,7 @@ void init(void) {
 	glMatrixMode(GL_PROJECTION);
 
 	//time data
-	time =0.0;
+	time_scene =0.0;
 	step = 0.03333;
 
 	scene = new Scene();
@@ -161,19 +175,28 @@ void init(void) {
 	//scene->models.push_back(&planeYPos);	//Comment to remove top to box!
 	scene->models.push_back(&planeXPos);
 
+	ModelView box = ModelView();
+	actor = new Actor(box);
+	//scene->actors.push_back(actor);
+
 	Renderer::init();
 }
 
 Trajectory& createKeyFrames(void){
 	Trajectory* path = new Trajectory();
 	return *path;
+
+	
+	//movie init
+	title = "Reynolds Boid Simulation";
+	filetitle = "reynolds_boid_simulation";
 }
 
 ////================================
 //// update
 ////================================
 void update( void ) {
-	scene->update(time, step);
+	scene->update(time_scene, step);
 
 	//for debugging
 	//for(unsigned int i=0; i<numBalls; ++i){
@@ -186,7 +209,7 @@ void update( void ) {
 			polygon poly = planes.at(j);
 			if(CollisionDetector::intersects(balls.at(i), poly)){
 				//printf("COLLISION!!\n\n\n");
-				balls.at(i)->handlePolygonCollision(poly, time, step);
+				balls.at(i)->handlePolygonCollision(poly, time_scene, step);
 			}
 		}
 	}
@@ -202,7 +225,7 @@ void update( void ) {
 					//printf("\nBALL COLLSioN %d  %d\n", i, j);
 					//balls.at(i)->mesh.color = vertex3(0.0, 1.0, 0.0);
 					//balls.at(j)->mesh.color = vertex3(0.0, 0.0, 1.0);
-					balls.at(i)->handleRigidBodyCollision(balls.at(j), time, step);
+					balls.at(i)->handleRigidBodyCollision(balls.at(j), time_scene, step);
 					beenProcessed[i] = true;
 					beenProcessed[j] = true;
 				}
@@ -216,7 +239,7 @@ void update( void ) {
 // render
 //================================
 void render( void ){
-	    time += step;
+	    time_scene += step;
 	
 	    // clear buffer
 		glClearColor (0.0, 0.0, 0.0, 0.0);
@@ -281,6 +304,10 @@ void render( void ){
 		//Renderer::draw(new Pose(0.0, 0.0, -100.0, 15.0, 30.0, 0.0), &box);
 		glutSwapBuffers();
 
+		if( GENERATE_MOVIE ) {
+			 output.write_frame( filename, g_frameIndex, g_screenWidth, g_screenHeight);
+		}
+
 		// disable lighting
 		glDisable(GL_COLOR_MATERIAL);
 		glDisable(GL_LIGHT0);
@@ -315,8 +342,9 @@ void reshape( int w, int h ) {
 	//gluLookAt(0.0, 0.0, -10.0, 0.0, 0.0, -9.0, 0.0, 1.0, 0.0);
 	//when rotating around y, must change x and z values
 	//gluLookAt(10.0, 0.0, 0.0, 9.0, 0.0, 0.0, 0.0, 1.0, 0.0);
-	//gluLookAt(10.0, 3.0, -10.0, 4.0, 0.0, -4.0, 0.0, 1.0, 0.0);
-	gluLookAt(0.0, 30.0, -20.0, 0.0, -8.0, 8.0, 0.0, 1.0, 0.0);
+	//gluLookAt(10.0, 3.0, -10.0, 4.0, 0.0, -4.0, 0.0, 1.0, 0.0);			//side close up
+	//gluLookAt(0.0, 0.0, -32.0, 0.0, -2.0, 8.0, 0.0, 1.0, 0.0);		//front view
+	gluLookAt(0.0, 30.0, -15.0, 0.0, -3.0, 5.0, 0.0, 1.0, 0.0);
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -387,7 +415,7 @@ int main( int argc, char** argv ){
 	// create opengL window
 	glutInit( &argc, argv );
 	glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-	glutInitWindowSize( 500, 500 ); 
+	glutInitWindowSize( 640, 480 ); 
 	glutInitWindowPosition( 100, 100 );
 	glutCreateWindow( "Interpolation Example" );
 
@@ -411,26 +439,4 @@ int main( int argc, char** argv ){
 	return 0;
 }
 
-*/
-
-
-//white light
-/*
-		// light source attributes
-		GLfloat LightAmbient[]	= { 1.0f, 1.8f, 1.0f, 1.0f };
-		GLfloat LightDiffuse[]	= { 1.0f, 1.0f, 1.0f, 1.0f };
-		GLfloat LightSpecular[]	= { 1.0f, 1.0f, 1.0f, 1.0f };
-		GLfloat LightPosition[] = { 0.0f, 10.0f, 0.0f, 1.0f };
-
-		glLightfv(GL_LIGHT0, GL_AMBIENT , LightAmbient );
-		glLightfv(GL_LIGHT0, GL_DIFFUSE , LightDiffuse );
-		glLightfv(GL_LIGHT0, GL_SPECULAR, LightSpecular);
-		glLightfv(GL_LIGHT0, GL_POSITION, LightPosition);
-		
-		// surface material attributes
-		GLfloat material_Ka[]	= { 1.0f, 1.0f, 1.0f, 1.0f };
-		GLfloat material_Kd[]	= { 1.0f, 1.0f, 1.0f, 1.0f };
-		GLfloat material_Ks[]	= { 1.0f, 1.0f, 1.0f, 1.0f };
-		GLfloat material_Ke[]	= { 0.1f , 0.0f , 0.1f , 1.0f };
-		GLfloat material_Se		= 10;
-*/
+#endif	//if not current main file

@@ -1,17 +1,16 @@
-﻿Build started 7/12/2014 9:00:31 AM.
+﻿Build started 7/18/2014 2:49:48 PM.
      1>Project "C:\Users\Lindsey\Documents\Visual Studio 2012\Projects\hierarchy\SimpleGLUT.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /IE:\Eigen\ /IC:\boost_1_55_0\ /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _CRT_SECURE_NO_WARNINGS /D _VC80_UPGRADE=0x0600 /D _MBCS /Gm /EHsc /RTC1 /MTd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo".\Debug/" /Fd".\Debug/vc110.pdb" /Gd /TP /analyze- /errorReport:prompt lab01.cpp lab03.cpp
-         lab03.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /IE:\Eigen\ /IC:\boost_1_55_0\ /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _CRT_SECURE_NO_WARNINGS /D _VC80_UPGRADE=0x0600 /D _MBCS /Gm /EHsc /RTC1 /MTd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo".\Debug/" /Fd".\Debug/vc110.pdb" /Gd /TP /analyze- /errorReport:prompt lab01.cpp
          lab01.cpp
      1>c:\users\lindsey\documents\visual studio 2012\projects\hierarchy\modelview.h(269): warning C4018: '<' : signed/unsigned mismatch
      1>c:\users\lindsey\documents\visual studio 2012\projects\hierarchy\modelview.h(283): warning C4018: '<' : signed/unsigned mismatch
      1>c:\users\lindsey\documents\visual studio 2012\projects\hierarchy\modelview.h(300): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\lindsey\documents\visual studio 2012\projects\hierarchy\trajectory.h(66): warning C4018: '>' : signed/unsigned mismatch
-     1>c:\users\lindsey\documents\visual studio 2012\projects\hierarchy\flock.h(270): warning C4018: '<' : signed/unsigned mismatch
-         Generating Code...
+     1>c:\users\lindsey\documents\visual studio 2012\projects\hierarchy\trajectory.h(68): warning C4018: '>' : signed/unsigned mismatch
+     1>c:\users\lindsey\documents\visual studio 2012\projects\hierarchy\flock.h(106): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\lindsey\documents\visual studio 2012\projects\hierarchy\flock.h(297): warning C4018: '<' : signed/unsigned mismatch
        Link:
-         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:".\Debug/SimpleGLUT.exe" /INCREMENTAL /NOLOGO /LIBPATH:C:\boost_1_55_0\bin.v2\libs glew32.lib odbc32.lib odbccp32.lib opengl32.lib glu32.lib glut32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:".\Debug/SimpleGLUT.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE:NO /IMPLIB:".\Debug\SimpleGlut.lib" /MACHINE:X86 /SAFESEH .\Debug\simpleGlut.res
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:".\Debug/SimpleGLUT.exe" /INCREMENTAL /NOLOGO /LIBPATH:C:\boost_1_55_0\bin.v2\libs "C:\Users\Lindsey\Documents\Visual Studio 2012\Projects\Hierarchy\lib\libtiff.lib" glew32.lib odbc32.lib odbccp32.lib opengl32.lib glu32.lib glut32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:".\Debug/SimpleGLUT.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE:NO /IMPLIB:".\Debug\SimpleGlut.lib" /MACHINE:X86 /SAFESEH .\Debug\simpleGlut.res
          .\Debug/Joint.obj
          .\Debug/lab02.obj
          .\Debug/lab03.obj
@@ -20,10 +19,9 @@
          .\Debug/lab01.obj
          .\Debug/Link.obj
          .\Debug/StdAfx.obj
-     1>Joint.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/SAFESEH' specification
          SimpleGLUT.vcxproj -> C:\Users\Lindsey\Documents\Visual Studio 2012\Projects\hierarchy\.\Debug\SimpleGlut.exe
      1>Done Building Project "C:\Users\Lindsey\Documents\Visual Studio 2012\Projects\hierarchy\SimpleGLUT.vcxproj" (Build target(s)).
 
 Build succeeded.
 
-Time Elapsed 00:00:27.77
+Time Elapsed 00:00:07.64

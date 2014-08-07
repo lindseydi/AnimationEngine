@@ -1,20 +1,27 @@
 ========================================================================
-       CONSOLE APPLICATION : SimpleGLUT
+       CONSOLE APPLICATION : AnimationEngine
 ========================================================================
 
+Author: Lindsey DiAntonio
+lindseydiantonio@gmail.com
 
-AppWizard has created this SimpleGLUT application for you.  
+There are four working mainfiles, each is toggled by a #IF 1/0 at the top
 
-This file contains a summary of what you will find in each of the files that
-make up your SimpleGLUT application.
+Lab01.cpp - Interpolates movement of a mesh along a spline 
+			generated from a list of KeyFrames
 
-SimpleGLUT.dsp
-    This file (the project file) contains information at the project level and
-    is used to build a single project or subproject. Other users can share the
-    project (.dsp) file, but they should export the makefiles locally.
+Lab02.cpp - A hierarchical body walks along a spline trajectory
 
-SimpleGLUT.cpp
-    This is the main application source file.
+Lab03.cpp - A rigid body simulation of lots of spheres bouncing in a box.
+
+Lab04.cpp - A flocking reynolds-boid simulation of a group of pyramids moving 
+			towards a motivation.
+
+
+/////////////////////////////////////////////////////////////////////////////
+
+Within mainfile if GENERATE_MOVIE is set to 1, running the program will output
+a .tif file for each frame rendered.
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -30,5 +37,12 @@ Other notes:
 
 AppWizard uses "TODO:" to indicate parts of the source code you
 should add to or customize.
+
+/////////////////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////////////////
+Uses Eigen Math Library for Vector and Matrix math.
+http://eigen.tuxfamily.org/index.php?title=Main_Page
+Thank you Eigen Team!!
 
 /////////////////////////////////////////////////////////////////////////////
